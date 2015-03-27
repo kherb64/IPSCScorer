@@ -1,0 +1,42 @@
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:divider="?android:attr/dividerHorizontal"
+    android:orientation="horizontal"
+    tools:context="kherb64.android.ipscscorer.app.MainActivity">
+
+    <fragment
+        android:layout_weight="6"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:id="@+id/fragment_targets"
+        android:name="kherb64.android.ipscscorer.TargetFragment"
+        tools:layout="@layout/fragment_targets" />
+
+    <LinearLayout
+        android:layout_weight="6"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <fragment
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:id="@+id/fragment_score"
+            android:name="kherb64.android.ipscscorer.ScoreFragment"
+            tools:layout="@layout/fragment_score" />
+
+        <fragment
+            android:layout_weight="0"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:id="@+id/fragment_total"
+            android:name="kherb64.android.ipscscorer.TotalFragment"
+            tools:layout="@layout/target_total" />
+
+    </LinearLayout>
+
+</LinearLayout>

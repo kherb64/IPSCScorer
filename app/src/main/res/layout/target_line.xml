@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/list_item_target"
+        android:layout_width="@dimen/abc_action_button_min_width_material"
+        android:layout_height="@dimen/abc_action_button_min_height_material"
+        android:text="T"
+        android:textSize="24dp"
+        android:gravity="center"/>
+
+    <Button
+        android:id="@+id/list_item_btn_score_a"
+        android:text="@string/score_a"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:minWidth="@dimen/abc_action_button_min_width_material"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/abc_action_button_min_height_material"/>
+
+    <Button
+        android:id="@+id/list_item_btn_score_b"
+        android:text="@string/score_b"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:minWidth="@dimen/abc_action_button_min_width_material"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/abc_action_button_min_height_material"/>
+
+    <Button
+        android:id="@+id/list_item_btn_score_c"
+        android:text="@string/score_c"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:minWidth="@dimen/abc_action_button_min_width_material"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/abc_action_button_min_height_material"/>
+
+    <Button
+        android:id="@+id/list_item_btn_score_d"
+        android:text="@string/score_d"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:minWidth="@dimen/abc_action_button_min_width_material"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/abc_action_button_min_height_material"/>
+
+    <Button
+        android:id="@+id/list_item_btn_score_m"
+        android:text="@string/score_m"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:minWidth="@dimen/abc_action_button_min_width_material"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/abc_action_button_min_height_material"/>
+</LinearLayout>

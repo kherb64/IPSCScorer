@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/score_total_target"
+        android:layout_width="@dimen/abc_action_button_min_width_material"
+        android:layout_height="@dimen/abc_action_button_min_height_material"
+        android:text="0"
+        android:textSize="24dp"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/score_total_a"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:minWidth="@dimen/abc_action_button_min_width_material"
+        android:layout_height="@dimen/abc_action_button_min_height_material"
+        android:text="0 A"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/score_total_b"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:minWidth="@dimen/abc_action_button_min_width_material"
+        android:layout_height="@dimen/abc_action_button_min_height_material"
+        android:text="0 B"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/score_total_c"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:minWidth="@dimen/abc_action_button_min_width_material"
+        android:layout_height="@dimen/abc_action_button_min_height_material"
+        android:text="0 C"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/score_total_d"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:minWidth="@dimen/abc_action_button_min_width_material"
+        android:layout_height="@dimen/abc_action_button_min_height_material"
+        android:text="0 D"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/score_total_m"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:minWidth="@dimen/abc_action_button_min_width_material"
+        android:layout_height="@dimen/abc_action_button_min_height_material"
+        android:text="0 M"
+        android:gravity="center"/>
+
+</LinearLayout>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- shooter line -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/score_shooter"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/abc_action_button_min_height_material"
+                android:gravity="center_vertical"
+                android:hint="@string/Shooter" />
+
+            <Button
+                android:id="@+id/btn_score_factor"
+                android:layout_width="96dp"
+                android:layout_height="@dimen/abc_action_button_min_height_material"
+                android:text="@string/factor_minor"
+                android:gravity="center" />
+
+        </LinearLayout>
+
+        <!-- shots line -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/score_time"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/abc_action_button_min_height_material"
+                android:gravity="center_vertical"
+                android:layout_gravity="left"
+                android:inputType="time"
+                android:hint="@string/Time" />
+
+            <EditText
+                android:id="@+id/score_num_shots"
+                android:layout_width="96dp"
+                android:layout_height="@dimen/abc_action_button_min_height_material"
+                android:gravity="center_vertical"
+                android:layout_gravity="right"
+                android:inputType="number"
+                android:hint="@string/num_shots" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/score_comment"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:hint="Comment"
+            android:gravity="center_vertical"
+            android:lines="2"
+            android:maxLines="2" />
+
+        <!-- other hits/scores line -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_score_pt"
+                android:text="@string/score_pt"
+                android:textColor="@android:color/primary_text_light"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:minWidth="64dp"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/abc_action_button_min_height_material" />
+
+            <Button
+                android:id="@+id/btn_score_prc"
+                android:text="@string/score_prc"
+                android:textColor="@android:color/secondary_text_light"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:minWidth="64dp"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/abc_action_button_min_height_material" />
+
+            <Button
+                android:id="@+id/btn_score_dq"
+                android:text="@string/score_dq"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:minWidth="64dp"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/abc_action_button_min_height_material" />
+
+            <TextView
+                android:layout_weight="3"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/abc_action_button_min_height_material" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
