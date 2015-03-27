@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -138,7 +139,7 @@ public class ScoreFragment extends Fragment
             // buildTargets();
             return true;
         } else if (id == R.id.action_clear_score) {
-            clearScore();
+            new ClearScoreAsyncTask().execute("");
             return true;
         }
 
@@ -192,7 +193,7 @@ public class ScoreFragment extends Fragment
     @Override
     public void onPause() {
         super.onPause();
-        saveScore();
+        new SaveScoreAsyncTask().execute("");
     }
 
     @Override
@@ -249,7 +250,7 @@ public class ScoreFragment extends Fragment
      * @return return true if successful.
      */
     private boolean saveScore() {
-        Log.d(LOG_TAG, "Saving data");
+        Log.d(LOG_TAG, "Saving score");
         Uri scoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
 
         ViewHolder viewHolder = (ViewHolder) mRootView.getTag();
@@ -274,11 +275,12 @@ public class ScoreFragment extends Fragment
             // update score column
             // no selection, so update all rows
             mContext.getContentResolver().update(scoreUri, scoreValues, null, null);
-            Log.d(LOG_TAG, "Totals updated");
+            Log.d(LOG_TAG, "Score updated");
         } else {
             mContext.getContentResolver().insert(scoreUri, scoreValues);
-            Log.d(LOG_TAG, "Totals inserted");
+            Log.d(LOG_TAG, "Score inserted");
         }
+        cursor.close();
         return true;
     }
 
@@ -317,6 +319,22 @@ public class ScoreFragment extends Fragment
             // no selection, so update all rows
             mContext.getContentResolver().update(scoreUri, scoreValues, null, null);
         }
+        cursor.close();
     }
 
+    class SaveScoreAsyncTask extends AsyncTask<String, String, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            saveScore();
+            return null;
+        }
+    }
+
+    class ClearScoreAsyncTask extends AsyncTask<String, String, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            clearScore();
+            return null;
+        }
+    }
 }

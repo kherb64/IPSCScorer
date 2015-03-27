@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -127,7 +128,7 @@ public class TargetFragment extends Fragment
             // buildTargets();
             return true;
         } else if (id == R.id.action_clear_scores) {
-            clearAllTargetScores();
+            new ClearAllTargetScoresAsyncTask().execute("");
             return true;
         } else if (id == R.id.action_settings) {
             Intent settings = new Intent(getActivity(), SettingsActivity.class);
@@ -146,7 +147,9 @@ public class TargetFragment extends Fragment
             if (resultCode == Activity.RESULT_OK) {
                 boolean targetsChanged = data.getBooleanExtra(SettingsActivity.TARGETS_CHANGED, false);
                 Log.v(LOG_TAG, "Targets changed? " + targetsChanged);
-                if (targetsChanged) buildTargets();
+                if (targetsChanged) {
+                    new BuildTargetsAsyncTask().execute("");
+                }
             }
         }
     }
@@ -222,11 +225,12 @@ public class TargetFragment extends Fragment
         if (cursor.moveToFirst()) {
             Log.d(LOG_TAG, cursor.getCount() + " Targets found in database");
         } else {
-            buildTargets();
+            new BuildTargetsAsyncTask().execute("");
 
             // Call Loader
             getLoaderManager().restartLoader(TARGET_LOADER, null, this);
         }
+        cursor.close();
     }
 
     /**
@@ -239,7 +243,9 @@ public class TargetFragment extends Fragment
             int numSteelPrefs = numTargetsPrefs(ScoreContract.TargetEntry.TARGET_TYPE_STEEL);
             int numPaperPRefs = numTargetsPrefs(ScoreContract.TargetEntry.TARGET_TYPE_PAPER);
             if (numSteelDb == 0 && numSteelPrefs > 0
-                    || numPaperDb == 0 && numPaperPRefs > 0) buildTargets();
+                    || numPaperDb == 0 && numPaperPRefs > 0) {
+                new BuildTargetsAsyncTask().execute("");
+            }
             else if (numSteelDb != numSteelPrefs
                     || numPaperDb != numPaperPRefs)
                 Log.w(LOG_TAG, "Your number of targets does not match your settings");
@@ -252,12 +258,15 @@ public class TargetFragment extends Fragment
      * @return returns the number of targets.
      */
     private int numTargetsDb(String targetType) {
-            Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
-            Cursor cursor = mContext.getContentResolver().query(targetUri, null,
-                    null, null, null);
-            if (cursor.moveToFirst()) {
-                return cursor.getCount();
-            } else return 0;
+        int cnt = 0;
+        Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
+        Cursor cursor = mContext.getContentResolver().query(targetUri, null,
+                null, null, null);
+        if (cursor.moveToFirst()) {
+            cnt = cursor.getCount();
+        }
+        cursor.close();
+        return cnt;
     }
 
     /**
@@ -322,8 +331,8 @@ public class TargetFragment extends Fragment
         Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
 
         // remove old targets
-        mContext.getContentResolver().delete(targetUri, null, null);
-        Log.d(LOG_TAG, "Old Targets deleted");
+        int deleted = mContext.getContentResolver().delete(targetUri, null, null);
+        Log.d(LOG_TAG, deleted + " old Targets deleted");
 
         // create new targets
         ContentValues targetValues = new ContentValues();
@@ -353,7 +362,7 @@ public class TargetFragment extends Fragment
      * Clears each score from each target in the database.
      */
     private void clearAllTargetScores() {
-        Log.d(LOG_TAG, "Clearing all scores");
+        Log.d(LOG_TAG, "Clearing all target scores");
         mPosition = ListView.INVALID_POSITION;
 
         // are there any targets in the database?
@@ -373,8 +382,10 @@ public class TargetFragment extends Fragment
             targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_M, 0);
 
             // no selection, so update all rows
-            mContext.getContentResolver().update(targetUri, targetValues, null, null);
+            int updated = mContext.getContentResolver().update(targetUri, targetValues, null, null);
+            Log.d(LOG_TAG, updated + " target scores cleared");
         }
+        cursor.close();
     }
 
     /**
@@ -408,6 +419,37 @@ public class TargetFragment extends Fragment
 
     public void setPosition(int position) {
         mPosition = position;
+    }
+
+
+    class ClearAllTargetScoresAsyncTask extends AsyncTask<String, String, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            clearAllTargetScores();
+            return null;
+        }
+    }
+
+    class ClearTargetScoresAsyncTask extends AsyncTask<String, String, String> {
+
+        private final int mTargetNum;
+
+        ClearTargetScoresAsyncTask(int targetNum) {
+            mTargetNum = targetNum;
+        }
+        @Override
+        protected String doInBackground(String... strings) {
+            clearTargetScores(mTargetNum);
+            return null;
+        }
+    }
+
+    class BuildTargetsAsyncTask extends AsyncTask<String, String, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            buildTargets();
+            return null;
+        }
     }
 
 

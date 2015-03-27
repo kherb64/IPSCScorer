@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -111,7 +112,7 @@ public class TotalFragment extends Fragment
     @Override
     public void onPause() {
         super.onPause();
-        saveTotals();
+        new SaveTotalsAsyncTask().execute("");
     }
 
 
@@ -162,7 +163,7 @@ public class TotalFragment extends Fragment
      * @return return true if successful.
      */
     private boolean saveTotals() {
-        Log.d(LOG_TAG, "Saving totals data");
+        Log.d(LOG_TAG, "Saving totals");
         Uri totalUri = ScoreContract.ScoreEntry.CONTENT_URI;
 
         ContentValues totalValues = new ContentValues();
@@ -186,6 +187,14 @@ public class TotalFragment extends Fragment
             Log.d(LOG_TAG, "Totals inserted");
         }
         return true;
+    }
+
+    class SaveTotalsAsyncTask extends AsyncTask<String, String, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            saveTotals();
+            return null;
+        }
     }
 
 }

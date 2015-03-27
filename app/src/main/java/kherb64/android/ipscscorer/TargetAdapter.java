@@ -121,6 +121,7 @@ public class TargetAdapter extends CursorAdapter
             int targetNum = cursor.getInt(TargetFragment.COL_TARGET_NUM);
             Log.v (LOG_TAG, "Target " + targetNum + " Button " + button.getText());
             increaseScore(targetNum, v);
+            cursor.close();
         }
     };
 
@@ -272,6 +273,7 @@ public class TargetAdapter extends CursorAdapter
             // no selection, so update all rows
             mContext.getContentResolver().update(targetUri, targetValues, selection, args);
         }
+        cursor.close();
     }
 
     private int maxScore(String targetType) {

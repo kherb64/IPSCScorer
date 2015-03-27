@@ -260,7 +260,6 @@ public class ScoreProvider extends ContentProvider{
             Log.d(LOG_TAG, "Totals inserted");
         }
         cursor.close();
-        Log.d(LOG_TAG, "Totals updated");
 
         return 0;
     }
