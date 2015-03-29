@@ -1,17 +1,14 @@
 package kherb64.android.ipscscorer;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +24,8 @@ public class TotalFragment extends Fragment
 
     private final String LOG_TAG = TotalFragment.class.getSimpleName();
     private final int TOTAL_LOADER = 2;
-    static final String SCORE_URI = "URI";
-    private Uri mScoreUri;
+    // private Uri mScoreUri;
+    private Uri mTargetUri;
     private Context mContext;
     private View mRootView;
 
@@ -47,16 +44,15 @@ public class TotalFragment extends Fragment
     static final int COL_TOTAL_C = 3;
     static final int COL_TOTAL_D = 4;
     static final int COL_TOTAL_M = 5;
-    static final int COL_TOTAL_TARGET = 6;
 
     private static final String[] TOTAL_COLUMNS = {
-            ScoreContract.ScoreEntry.TABLE_NAME + "." + ScoreContract.ScoreEntry._ID,
-            ScoreContract.ScoreEntry.COLUMN_TOTAL_A,
-            ScoreContract.ScoreEntry.COLUMN_TOTAL_B,
-            ScoreContract.ScoreEntry.COLUMN_TOTAL_C,
-            ScoreContract.ScoreEntry.COLUMN_TOTAL_D,
-            ScoreContract.ScoreEntry.COLUMN_TOTAL_M,
-            ScoreContract.ScoreEntry.COLUMN_TOTAL_TARGET};
+            ScoreContract.TargetEntry.TABLE_NAME + "." + ScoreContract.TargetEntry._ID,
+            ScoreContract.TargetEntry.COLUMN_SCORE_A,
+            ScoreContract.TargetEntry.COLUMN_SCORE_B,
+            ScoreContract.TargetEntry.COLUMN_SCORE_C,
+            ScoreContract.TargetEntry.COLUMN_SCORE_D,
+            ScoreContract.TargetEntry.COLUMN_SCORE_M
+    };
 
     /**
      * Cache of the children views for a forecast list item.
@@ -88,7 +84,8 @@ public class TotalFragment extends Fragment
         // orig return super.onCreateView(inflater, container, savedInstanceState);
         mRootView = inflater.inflate(R.layout.target_total, container, false);
         mContext = getActivity();
-        mScoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
+        // mScoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
+        mTargetUri = ScoreContract.TargetEntry.CONTENT_URI;
 
         ViewHolder viewHolder = new ViewHolder(mRootView);
         mRootView.setTag(viewHolder);
@@ -105,17 +102,17 @@ public class TotalFragment extends Fragment
     @Override
     public void onPause() {
         super.onPause();
-        new SaveTotalsAsyncTask().execute("");
+        // new SaveTotalsAsyncTask().execute("");
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if (null != mScoreUri) {
-            // No create and return a CursorLoader that will take care of
+        if (null != mTargetUri) {
+            // Now create and return a CursorLoader that will take care of
             // creating a Cursor for the data being displayed.
             return new CursorLoader(
                     getActivity(),
-                    mScoreUri,
+                    mTargetUri,
                     TOTAL_COLUMNS,
                     null,
                     null,
@@ -126,15 +123,26 @@ public class TotalFragment extends Fragment
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data != null && data.moveToFirst()) {
-            // read score data from cursor and fill the views via the viewholder
-            ViewHolder viewHolder = (ViewHolder) mRootView.getTag();
+            // read score data from cursor and sum up
+            mScoreA = 0;
+            mScoreB = 0;
+            mScoreC = 0;
+            mScoreD = 0;
+            mScoreM = 0;
 
-            mScoreA = data.getInt(COL_TOTAL_A);
-            mScoreB = data.getInt(COL_TOTAL_B);
-            mScoreC = data.getInt(COL_TOTAL_C);
-            mScoreD = data.getInt(COL_TOTAL_D);
-            mScoreM = data.getInt(COL_TOTAL_M);
-            mScoreTotal = data.getInt(COL_TOTAL_TARGET);
+            do {
+                mScoreA += data.getInt(COL_TOTAL_A);
+                mScoreB += data.getInt(COL_TOTAL_B);
+                mScoreC += data.getInt(COL_TOTAL_C);
+                mScoreD += data.getInt(COL_TOTAL_D);
+                mScoreM += data.getInt(COL_TOTAL_M);
+            } while (data.moveToNext());
+
+            mScoreTotal = mScoreA + mScoreB + mScoreC + mScoreD + mScoreM;
+
+            // fill the views via the viewholder
+
+            ViewHolder viewHolder = (ViewHolder) mRootView.getTag();
 
             viewHolder.total_a.setText(mScoreA + " A");
             viewHolder.total_b.setText(mScoreB + " B");
@@ -148,45 +156,6 @@ public class TotalFragment extends Fragment
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
-    }
-
-    /**
-     * Saves entered screen data to the database.
-     * @return return true if successful.
-     */
-    public boolean saveTotals() {
-        Log.d(LOG_TAG, "Saving totals");
-        Uri totalUri = ScoreContract.ScoreEntry.CONTENT_URI;
-
-        ContentValues totalValues = new ContentValues();
-
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_A, mScoreA);
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_B, mScoreB);
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_C, mScoreC);
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_D, mScoreD);
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_M, mScoreM);
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_TARGET, mScoreTotal);
-
-        // score available?
-        Cursor cursor = mContext.getContentResolver().query(totalUri, null,
-                null, null, null);
-        if (cursor.moveToFirst()) {
-            // update score columns
-            mContext.getContentResolver().update(totalUri, totalValues, null, null);
-            Log.d(LOG_TAG, "Totals updated");
-        } else {
-            mContext.getContentResolver().insert(totalUri, totalValues);
-            Log.d(LOG_TAG, "Totals inserted");
-        }
-        return true;
-    }
-
-    class SaveTotalsAsyncTask extends AsyncTask<String, String, String> {
-        @Override
-        protected String doInBackground(String... strings) {
-            saveTotals();
-            return null;
-        }
     }
 
 }

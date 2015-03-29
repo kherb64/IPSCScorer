@@ -102,6 +102,7 @@ public class TargetFragment extends Fragment
                 mFirstVisiblePosition = savedInstanceState.getInt(FIRST_VISIBLE_POSITION);
         }
 
+        mMainActivity.onTargetSelected(mPosition);
         mMainActivity.buildInitialTargets();
 
         return rootView;
@@ -160,6 +161,9 @@ public class TargetFragment extends Fragment
         // Swap the new cursor in. (The framework will take care of closing the
         // old cursor once we return.)
         mTargetAdapter.swapCursor(data);
+        int mainPosition = mMainActivity.selectedTarget();
+        if (mainPosition != ListView.INVALID_POSITION)
+            mPosition = mMainActivity.selectedTarget();
 
         // invalidated in MainActivity.onCreate
         if (mPosition != ListView.INVALID_POSITION) {

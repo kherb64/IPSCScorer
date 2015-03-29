@@ -241,7 +241,7 @@ public class ScoreFragment extends Fragment
      * Saves entered screen data to the database.
      * @return return true if successful.
      */
-    public boolean saveScore() {
+    private boolean saveScore() {
         Log.d(LOG_TAG, "Saving score");
         Uri scoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
 
@@ -279,7 +279,7 @@ public class ScoreFragment extends Fragment
     /**
      * Clears the score value from the database.
      */
-    public void clearScore() {
+    private void clearScore() {
         // get score
         Uri scoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
         Cursor cursor = mContext.getContentResolver().query(scoreUri, null, null, null, null);

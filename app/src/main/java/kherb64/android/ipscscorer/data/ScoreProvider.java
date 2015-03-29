@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.util.Log;
 
 /**
  * Content provider for score.db
@@ -160,7 +159,6 @@ public class ScoreProvider extends ContentProvider {
         switch (match) {
             case TARGET: {
                 rowsDeleted = db.delete(ScoreContract.TargetEntry.TABLE_NAME, selection, selectionArgs);
-                updateTotals();
                 break;
             }
             case SCORE: {
@@ -195,7 +193,6 @@ public class ScoreProvider extends ContentProvider {
         switch (match) {
             case TARGET: {
                 rowsUpdated = db.update(ScoreContract.TargetEntry.TABLE_NAME, values, selection, selectionArgs);
-                updateTotals();
                 break;
             }
             case SCORE: {
@@ -210,63 +207,6 @@ public class ScoreProvider extends ContentProvider {
             getContext().getContentResolver().notifyChange(uri, null);
 
         return rowsUpdated;
-    }
-
-    private int updateTotals() {
-        Log.d(LOG_TAG, "Updating totals");
-
-        int totalsA = 0;
-        int totalsB = 0;
-        int totalsC = 0;
-        int totalsD = 0;
-        int totalsM = 0;
-        int totalsTotals;
-
-        Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
-        Cursor cursor = query(targetUri, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            // get column indices.
-            int indexA = cursor.getColumnIndex(ScoreContract.TargetEntry.COLUMN_SCORE_A);
-            int indexB = cursor.getColumnIndex(ScoreContract.TargetEntry.COLUMN_SCORE_B);
-            int indexC = cursor.getColumnIndex(ScoreContract.TargetEntry.COLUMN_SCORE_C);
-            int indexD = cursor.getColumnIndex(ScoreContract.TargetEntry.COLUMN_SCORE_D);
-            int indexM = cursor.getColumnIndex(ScoreContract.TargetEntry.COLUMN_SCORE_M);
-            do {
-                totalsA += cursor.getInt(indexA);
-                totalsB += cursor.getInt(indexB);
-                totalsC += cursor.getInt(indexC);
-                totalsD += cursor.getInt(indexD);
-                totalsM += cursor.getInt(indexM);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-
-        totalsTotals = totalsA + totalsB + totalsC + totalsD + totalsM;
-
-        ContentValues totalValues = new ContentValues();
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_A, totalsA);
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_B, totalsB);
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_C, totalsC);
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_D, totalsD);
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_M, totalsM);
-        totalValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_TARGET, totalsTotals);
-
-        // score available?
-        Uri totalUri = ScoreContract.ScoreEntry.CONTENT_URI;
-        cursor = query(totalUri, null,
-                null, null, null);
-        if (cursor.moveToFirst()) {
-            // update score column
-            // no selection, so update all rows
-            update(totalUri, totalValues, null, null);
-            Log.d(LOG_TAG, "Totals updated");
-        } else {
-            insert(totalUri, totalValues);
-            Log.d(LOG_TAG, "Totals inserted");
-        }
-        cursor.close();
-
-        return 0;
     }
 
 }

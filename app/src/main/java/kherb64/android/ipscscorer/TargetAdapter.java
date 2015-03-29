@@ -97,10 +97,9 @@ public class TargetAdapter extends CursorAdapter {
     }
 
     private View.OnClickListener onScoreBtnClickListener = new View.OnClickListener() {
+        // TODO move clicking from adapter to fragmet, but this is too difficult for me now.
         @Override
         public void onClick(View v) {
-            // TODO move clicking from adapter to fragment,
-            // but this is too difficult for me now.
             Button button = (Button) v;
             int position = mListView.getPositionForView((View) v.getParent());
 
@@ -109,11 +108,13 @@ public class TargetAdapter extends CursorAdapter {
 
             // move cursor to position
             Cursor cursor = getCursor();
-            cursor.moveToPosition(position);
-            int targetNum = cursor.getInt(TargetFragment.COL_TARGET_NUM);
-            Log.v (LOG_TAG, "Target " + targetNum + " Button " + button.getText());
-            increaseScore(targetNum, v);
-            cursor.close();
+            if (cursor != null) {
+                if (cursor.moveToPosition(position)) {
+                    int targetNum = cursor.getInt(TargetFragment.COL_TARGET_NUM);
+                    Log.v(LOG_TAG, "Target " + targetNum + " Button " + button.getText());
+                    increaseScore(cursor, targetNum, v);
+                }
+            }
         }
     };
 
@@ -229,50 +230,50 @@ public class TargetAdapter extends CursorAdapter {
         else return Color.GRAY;
     }
 
-    private void increaseScore(int targetNum, View view) {
+    /**
+     * Increases the score of the given target.
+     * @param cursor Cursor pointing to the target. Has to be open.
+     * @param targetNum Number of the target to be updated
+     * @param view Button that has been clicked. Indicates the score.
+     */
+    private void increaseScore(Cursor cursor, int targetNum, View view) {
         Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
+
+        String targetType = cursor.getString(TargetFragment.COL_TARGET_TYPE);
+
+        // update score column
+        ContentValues targetValues = new ContentValues();
+
+        if (view.getId() == R.id.list_item_btn_score_a) {
+            int score = cursor.getInt(TargetFragment.COL_SCORE_A);
+            if (score >= maxScore(targetType)) score = 0; else score++;
+            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_A, score);
+        }
+        if (view.getId() == R.id.list_item_btn_score_b) {
+            int score = cursor.getInt(TargetFragment.COL_SCORE_B);
+            if (score >= maxScore(targetType)) score = 0; else score++;
+            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_B, score);
+        }
+        if (view.getId() == R.id.list_item_btn_score_c) {
+            int score = cursor.getInt(TargetFragment.COL_SCORE_C);
+            if (score >= maxScore(targetType)) score = 0; else score++;
+            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_C, score);
+        }
+        if (view.getId() == R.id.list_item_btn_score_d) {
+            int score = cursor.getInt(TargetFragment.COL_SCORE_D);
+            if (score >= maxScore(targetType)) score = 0; else score++;
+            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_D, score);
+        }
+        if (view.getId() == R.id.list_item_btn_score_m) {
+            int score = cursor.getInt(TargetFragment.COL_SCORE_M);
+            if (score >= maxScore(targetType)) score = 0; else score++;
+            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_M, score);
+        }
+
+        // select given target
         String selection = ScoreContract.TargetEntry.COLUMN_TARGET_NUMBER + " = ? ";
         String[] args = { Integer.toString(targetNum) };
-        Cursor cursor = mContext.getContentResolver().query(targetUri, null,
-                selection, args, null);
-
-        // any targets available?
-        if (cursor.moveToFirst()) {
-            String targetType = cursor.getString(TargetFragment.COL_TARGET_TYPE);
-
-            // update score column
-            ContentValues targetValues = new ContentValues();
-
-            if (view.getId() == R.id.list_item_btn_score_a) {
-                int score = cursor.getInt(TargetFragment.COL_SCORE_A);
-                if (score >= maxScore(targetType)) score = 0; else score++;
-                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_A, score);
-            }
-            if (view.getId() == R.id.list_item_btn_score_b) {
-                int score = cursor.getInt(TargetFragment.COL_SCORE_B);
-                if (score >= maxScore(targetType)) score = 0; else score++;
-                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_B, score);
-            }
-            if (view.getId() == R.id.list_item_btn_score_c) {
-                int score = cursor.getInt(TargetFragment.COL_SCORE_C);
-                if (score >= maxScore(targetType)) score = 0; else score++;
-                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_C, score);
-            }
-            if (view.getId() == R.id.list_item_btn_score_d) {
-                int score = cursor.getInt(TargetFragment.COL_SCORE_D);
-                if (score >= maxScore(targetType)) score = 0; else score++;
-                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_D, score);
-            }
-            if (view.getId() == R.id.list_item_btn_score_m) {
-                int score = cursor.getInt(TargetFragment.COL_SCORE_M);
-                if (score >= maxScore(targetType)) score = 0; else score++;
-                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_M, score);
-            }
-
-            // no selection, so update all rows
-            mContext.getContentResolver().update(targetUri, targetValues, selection, args);
-        }
-        cursor.close();
+        mContext.getContentResolver().update(targetUri, targetValues, selection, args);
     }
 
     private int maxScore(String targetType) {
