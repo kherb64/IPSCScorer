@@ -45,7 +45,6 @@ public class MainActivity extends ActionBarActivity
         if (findViewById(R.id.fragment_score) != null) {
             mTwoPane = true;
         }
-        // TODO add explicit tablet layout
 
         // initialization for intelligent scrolling after rotating and/or target clicking
         mPosition = ListView.INVALID_POSITION;
@@ -160,7 +159,8 @@ public class MainActivity extends ActionBarActivity
     }
 
     /**
-     * Builds targets in the database taking the numbers form the settings.
+     * Builds targets in the database taking the numbers from the settings. Uses rebuildTargets
+     * for doing the work.
      */
     public void buildTargets() {
         Log.d(LOG_TAG, "Building targets");
@@ -176,7 +176,7 @@ public class MainActivity extends ActionBarActivity
 
     /**
      * Builds targets in the database taking the given numbers. Deletes any old targets in advance.
-     *
+     * Performs it's work via AsyncTask.
      * @param steelCount number of steel targets to be built.
      * @param paperCount number of paper targets to be built.
      */
@@ -184,6 +184,12 @@ public class MainActivity extends ActionBarActivity
         new RebuildTargetsAsyncTask(steelCount, paperCount).execute("");
     }
 
+    /**
+     * Local worker that will do the work. Typically Called by AsyncTask.
+     * @param steelCount Number of steel targets to be built.
+     * @param paperCount Number of paper targets to be built.
+     * @return Returns the number of targets that have been created.
+     */
     private int rebuildTargets2(int steelCount, int paperCount) {
         Log.d(LOG_TAG, "Rebuilding " + steelCount + " + " + paperCount + " targets");
         Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
@@ -239,6 +245,10 @@ public class MainActivity extends ActionBarActivity
     public void clearAllTargetScores() {
         new ClearAllTargetScoresAsyncTask().execute("");
     }
+
+    /**
+     * Local worker that will do the work. Typically Called by AsyncTask.
+     */
     private void clearAllTargetScores2() {
         Log.d(LOG_TAG, "Clearing all target scores");
         mPosition = ListView.INVALID_POSITION;
@@ -267,12 +277,16 @@ public class MainActivity extends ActionBarActivity
     }
 
     /**
-     * Clears each score from the given target number in the database.
+     * Clears each score from the given target number in the database. Uses an AsyncTask
+     * to perfom it's work.
      */
     public void clearTargetScores(int targetNum) {
         new ClearTargetScoresAsyncTask(targetNum).execute("");
     }
 
+    /**
+     * Local worker that will do the work. Typically Called by AsyncTask.
+     */
     private void clearTargetScores2(int targetNum) {
         Log.d(LOG_TAG, "Clearing scores of target " + targetNum);
 
