@@ -1,24 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- EditTextPreference
-        android:title="@string/pref_steel_targets_label"
-        android:key="@string/pref_steel_targets_key"
-        android:defaultValue="@string/pref_steel_targets_default"
-        android:numeric="integer"
-        android:singleLine="true"/>
 
     <EditTextPreference
-        android:title="@string/pref_paper_targets_label"
-        android:key="@string/pref_paper_targets_key"
-        android:defaultValue="@string/pref_paper_targets_default"
-        android:numeric="integer"
-        android:singleLine="true"/ -->
-
-    <EditTextPreference
-        android:title="@string/pref_shooter_label"
-        android:key="@string/pref_shooter_key"
-        android:defaultValue="@string/pref_shooter_default"
-        android:inputType="textPersonName"
+        android:title="@string/pref_parcours_label"
+        android:key="@string/pref_parcours_key"
+        android:defaultValue="@string/pref_parcours_default"
+        android:inputType="text"
         android:singleLine="true"/>
 
 </PreferenceScreen>

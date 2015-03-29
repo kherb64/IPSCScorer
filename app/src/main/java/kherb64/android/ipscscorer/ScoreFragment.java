@@ -2,15 +2,19 @@ package kherb64.android.ipscscorer;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,18 +26,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.util.ArrayList;
+
 import kherb64.android.ipscscorer.data.ScoreContract;
 
 /**
  * Fragment for non target based scores.
  */
 public class ScoreFragment extends Fragment
-    implements LoaderManager.LoaderCallbacks<Cursor> {
+        implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String LOG_TAG = ScoreFragment.class.getSimpleName();
+    private static final String SCORE_SHARE_HASHTAG = "#IPSCScorer";
     private final int SCORE_LOADER = 1;
     static final String SCORE_URI = "URI";
     private Uri mScoreUri;
+    private Uri mTargetUri;
     private Context mContext;
     private ShareActionProvider mShareActionProvider;
     private View mRootView;
@@ -42,18 +50,19 @@ public class ScoreFragment extends Fragment
     private int mScorePT;
     private int mScorePRC;
     private int mScoreDQ;
+    private String mScoreShareText;
 
     // These indices are tied to SCORE_COLUMNS. If SCORE_COLUMNS changes, these
     // must change.
-    static final int COL_SCORE_ID       = 0;
-    static final int COL_TOTAL_PT       = 1;
-    static final int COL_TOTAL_PRC      = 2;
-    static final int COL_TOTAL_DQ       = 3;
-    static final int COL_SHOOTER        = 4;
-    static final int COL_FACTOR         = 5;
-    static final int COL_NUM_SHOTS      = 6;
-    static final int COL_TIME           = 7;
-    static final int COL_COMMENT        = 8;
+    static final int COL_SCORE_ID = 0;
+    static final int COL_TOTAL_PT = 1;
+    static final int COL_TOTAL_PRC = 2;
+    static final int COL_TOTAL_DQ = 3;
+    static final int COL_SHOOTER = 4;
+    static final int COL_FACTOR = 5;
+    static final int COL_NUM_SHOTS = 6;
+    static final int COL_TIME = 7;
+    static final int COL_COMMENT = 8;
 
     private static final String[] SCORE_COLUMNS = {
             ScoreContract.ScoreEntry.TABLE_NAME + "." + ScoreContract.ScoreEntry._ID,
@@ -64,7 +73,23 @@ public class ScoreFragment extends Fragment
             ScoreContract.ScoreEntry.COLUMN_FACTOR,
             ScoreContract.ScoreEntry.COLUMN_NUM_SHOTS,
             ScoreContract.ScoreEntry.COLUMN_TIME,
-            ScoreContract.ScoreEntry.COLUMN_COMMENT };
+            ScoreContract.ScoreEntry.COLUMN_COMMENT};
+
+    // Indices for Target columns.
+    static final int COL_TOTAL_A = 1;
+    static final int COL_TOTAL_B = 2;
+    static final int COL_TOTAL_C = 3;
+    static final int COL_TOTAL_D = 4;
+    static final int COL_TOTAL_M = 5;
+
+    private static final String[] TARGET_COLUMNS = {
+            ScoreContract.TargetEntry.TABLE_NAME + "." + ScoreContract.TargetEntry._ID,
+            ScoreContract.TargetEntry.COLUMN_SCORE_A,
+            ScoreContract.TargetEntry.COLUMN_SCORE_B,
+            ScoreContract.TargetEntry.COLUMN_SCORE_C,
+            ScoreContract.TargetEntry.COLUMN_SCORE_D,
+            ScoreContract.TargetEntry.COLUMN_SCORE_M
+    };
 
     /**
      * Cache of the children views for a forecast list item.
@@ -108,6 +133,7 @@ public class ScoreFragment extends Fragment
             mScoreUri = args.getParcelable(ScoreFragment.SCORE_URI);
         } */
         mScoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
+        mTargetUri = ScoreContract.TargetEntry.CONTENT_URI;
 
         ViewHolder viewHolder = new ViewHolder(rootView);
         rootView.setTag(viewHolder);
@@ -125,6 +151,18 @@ public class ScoreFragment extends Fragment
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_score, menu);
+
+        // Prepare Sharing
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+        // Get the provider and hold onto it to set/change then share intent.
+        mShareActionProvider =
+                (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+        // If onLoadFinished happens before this, we can go ahead and set the share intent
+        // If on CreateOptionsMenu has already happened, we need to update the share intent
+        if (mScoreShareText != null)
+            mShareActionProvider.setShareIntent(createShareScoreIntent());
+
     }
 
     @Override
@@ -133,8 +171,9 @@ public class ScoreFragment extends Fragment
         if (id == R.id.action_clear_score) {
             new ClearScoreAsyncTask().execute("");
             return true;
+        } else if (id == R.id.action_share) {
+            Log.d(LOG_TAG, "Now Sharing");
         }
-        // TODO add sharing content
         return super.onOptionsItemSelected(item);
     }
 
@@ -160,6 +199,7 @@ public class ScoreFragment extends Fragment
 
     /**
      * Increases the score on the given view.
+     *
      * @param view the view whos value weill be increased
      */
     private void increaseScore(View view) {
@@ -207,21 +247,70 @@ public class ScoreFragment extends Fragment
             // read score data from cursor and fill the views via the viewholder
             ViewHolder viewHolder = (ViewHolder) mRootView.getTag();
 
-            viewHolder.shooter.setText(data.getString(COL_SHOOTER));
+            String shooter = data.getString(COL_SHOOTER);
             mScoreFactor = data.getInt(COL_FACTOR);
-            viewHolder.btn_factor.setText(factorName(mScoreFactor));
-
-            viewHolder.time.setText(Integer.toString(data.getInt(COL_TIME)));
-            viewHolder.num_shots.setText(Integer.toString(data.getInt(COL_NUM_SHOTS)));
-            viewHolder.comment.setText(data.getString(COL_COMMENT));
-
+            int time = data.getInt(COL_TIME);
+            int numShots = data.getInt(COL_NUM_SHOTS);
+            String comment = data.getString(COL_COMMENT);
             mScorePT = data.getInt(COL_TOTAL_PT);
             mScorePRC = data.getInt(COL_TOTAL_PRC);
             mScoreDQ = data.getInt(COL_TOTAL_DQ);
+
+            updateScoreShareIntent(shooter, time, numShots, comment);
+
+            viewHolder.shooter.setText(shooter);
+            viewHolder.btn_factor.setText(factorName(mScoreFactor));
+            viewHolder.time.setText(Integer.toString(time));
+            viewHolder.num_shots.setText(Integer.toString(numShots));
+            viewHolder.comment.setText(comment);
             viewHolder.btn_pt.setText(mScorePT + " " + mContext.getString(R.string.score_pt));
             viewHolder.btn_prc.setText(mScorePRC + " " + mContext.getString(R.string.score_prc));
             viewHolder.btn_dq.setText(mScoreDQ + " " + mContext.getString(R.string.score_dq));
         }
+    }
+
+    private void updateScoreShareIntent(String shooter, int time, int numShots, String comment) {
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        String parcours = prefs.getString(mContext.getString(R.string.pref_parcours_key), mContext.getString(R.string.pref_parcours_default));
+
+        ArrayList<Integer> totals = getTotals();
+        String totalsString = totals.get(0) + " A"
+                + "\n" + totals.get(1) + " B"
+                + "\n" + totals.get(2) + " C"
+                + "\n" + totals.get(3) + " D"
+                + "\n" + totals.get(4) + " M";
+
+        mScoreShareText = mContext.getString(R.string.app_name) + " " + SCORE_SHARE_HASHTAG
+                + "\nParcours: " + parcours
+                + "\nShooter: " + shooter
+                + "\nFactoR: " + factorName(mScoreFactor)
+                + "\nTime: " + time
+                + "\nShots: " + numShots
+                + "\n" + totalsString
+                + "\nTotal shots: " + totals.get(5)
+                + "\nPenalties: " + mScorePT
+                + "\nProcedures: " + mScorePRC
+                + "\nDisqualified: " + mScorePT
+                + "\nComment: " + comment;
+
+
+        if (mShareActionProvider != null)
+            mShareActionProvider.setShareIntent(createShareScoreIntent());
+    }
+
+    /**
+     * Builds and returns a new intent for sharing the score as a text message.
+     *
+     * @return Returns an intent for the ShareActionProvider
+     */
+    private Intent createShareScoreIntent() {
+        // TODO bugfix: how to get the content from the screen rather form the database
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, mScoreShareText);
+        return shareIntent;
     }
 
     @Override
@@ -229,7 +318,7 @@ public class ScoreFragment extends Fragment
 
     }
 
-    private String factorName (int factor) {
+    private String factorName(int factor) {
         if (factor == ScoreContract.ScoreEntry.FACTOR_MINOR)
             return mContext.getString(R.string.factor_minor);
         else if (factor == ScoreContract.ScoreEntry.FACTOR_MAJOR)
@@ -239,6 +328,7 @@ public class ScoreFragment extends Fragment
 
     /**
      * Saves entered screen data to the database.
+     *
      * @return return true if successful.
      */
     private boolean saveScore() {
@@ -303,6 +393,46 @@ public class ScoreFragment extends Fragment
             mContext.getContentResolver().update(scoreUri, scoreValues, null, null);
         }
         cursor.close();
+    }
+
+    /**
+     * Retrieves the total target scores fresh from the database.
+     * @return Returns a list of integers representing the total target scores. The items are
+     * always sorted by this target sequence: A, B, C, D, M and the grand total.
+     */
+    public ArrayList<Integer> getTotals() {
+        // 0..4 = A..M; 5 = total
+        ArrayList<Integer> totals = new ArrayList<>();
+
+        int scoreA = 0;
+        int scoreB = 0;
+        int scoreC = 0;
+        int scoreD = 0;
+        int scoreM = 0;
+        int scoreTotal = 0;
+
+        Cursor cursor = mContext.getContentResolver().query(mTargetUri, TARGET_COLUMNS,
+                null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                scoreA += cursor.getInt(COL_TOTAL_A);
+                scoreB += cursor.getInt(COL_TOTAL_B);
+                scoreC += cursor.getInt(COL_TOTAL_C);
+                scoreD += cursor.getInt(COL_TOTAL_D);
+                scoreM += cursor.getInt(COL_TOTAL_M);
+            } while (cursor.moveToNext());
+
+            scoreTotal = scoreA + scoreB + scoreC + scoreD + scoreM;
+        }
+        cursor.close();
+
+        totals.add(scoreA);
+        totals.add(scoreB);
+        totals.add(scoreC);
+        totals.add(scoreD);
+        totals.add(scoreM);
+        totals.add(scoreTotal);
+        return totals;
     }
 
     class SaveScoreAsyncTask extends AsyncTask<String, String, String> {

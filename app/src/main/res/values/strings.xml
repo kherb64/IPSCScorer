@@ -18,10 +18,10 @@
     <string name="pref_paper_targets_key">paper_targets</string>
     <string name="pref_paper_targets_default">1</string>
     <string name="pref_paper_targets_hint">Number of paper targets</string>
-    <string name="pref_shooter_label">Shooter\'s  name</string>
-    <string name="pref_shooter_key">shooter</string>
-    <string name="pref_shooter_default">Shooter</string>
-    <string name="pref_shooter_hint">Name of the shooter</string>
+    <string name="pref_parcours_label">Parcours name</string>
+    <string name="pref_parcours_key">parcours</string>
+    <string name="pref_parcours_default">Parcours 1</string>
+    <string name="pref_parcours_hint">Name of the parcours</string>
     <string name="title_activity_settings">Settings</string>
     <string name="action_build_targets">Build targets</string>
     <string name="action_clear_target_scores">Clear target scores</string>
