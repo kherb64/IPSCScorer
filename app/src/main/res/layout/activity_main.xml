@@ -26,5 +26,4 @@
         android:name="kherb64.android.ipscscorer.TotalFragment"
         tools:layout="@layout/target_total" />
 
-
 </LinearLayout>

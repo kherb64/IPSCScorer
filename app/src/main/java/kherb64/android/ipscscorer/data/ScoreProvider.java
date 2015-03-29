@@ -12,7 +12,7 @@ import android.util.Log;
 /**
  * Content provider for score.db
  */
-public class ScoreProvider extends ContentProvider{
+public class ScoreProvider extends ContentProvider {
 
     private static final String LOG_TAG = ScoreProvider.class.getSimpleName();
 
@@ -123,7 +123,6 @@ public class ScoreProvider extends ContentProvider{
                     returnUri = ScoreContract.TargetEntry.buildTargetUri(_id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
-                updateTotals();
                 break;
             }
             case SCORE: {
@@ -153,7 +152,7 @@ public class ScoreProvider extends ContentProvider{
         // Student: Start by getting a writable database
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
-        int rowsDeleted = 0;
+        int rowsDeleted;
 
         // This makes delete all rows return the number of rows deleted
         if (selection == null) selection = "1";
@@ -180,12 +179,18 @@ public class ScoreProvider extends ContentProvider{
         return rowsDeleted;
     }
 
+    /**
+     * Updates entries in the score database.
+     * @param uri Uri built by rules in ScoreContract
+     * @param selection Common selection string for Cursor.queries
+     * @param selectionArgs Common selection valuees for Cursor.queries
+     * @return returns number of updated entries
+     */
     @Override
-    public int update(
-            Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
-        int rowsUpdated = 0;
+        int rowsUpdated;
 
         switch (match) {
             case TARGET: {
@@ -215,7 +220,7 @@ public class ScoreProvider extends ContentProvider{
         int totalsC = 0;
         int totalsD = 0;
         int totalsM = 0;
-        int totalsTotals = 0;
+        int totalsTotals;
 
         Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
         Cursor cursor = query(targetUri, null, null, null, null);

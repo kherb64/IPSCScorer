@@ -20,12 +20,12 @@ import android.widget.TextView;
 import kherb64.android.ipscscorer.data.ScoreContract;
 
 /**
- * Created by herb on 23.03.15.
+ * Fragment holding the total target scores
  */
 public class TotalFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private final String LOG_TAG = TargetFragment.class.getSimpleName();
+    private final String LOG_TAG = TotalFragment.class.getSimpleName();
     private final int TOTAL_LOADER = 2;
     static final String SCORE_URI = "URI";
     private Uri mScoreUri;
@@ -86,21 +86,14 @@ public class TotalFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // orig return super.onCreateView(inflater, container, savedInstanceState);
-        View rootView = inflater.inflate(R.layout.target_total, container, false);
+        mRootView = inflater.inflate(R.layout.target_total, container, false);
         mContext = getActivity();
-
-        /* Bundle args = getArguments();
-        if (args != null) {
-            // TODO What is this for?
-            mScoreUri = args.getParcelable(ScoreFragment.SCORE_URI);
-        } */
         mScoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
 
-        ViewHolder viewHolder = new ViewHolder(rootView);
-        rootView.setTag(viewHolder);
-        mRootView = rootView;
+        ViewHolder viewHolder = new ViewHolder(mRootView);
+        mRootView.setTag(viewHolder);
 
-        return rootView;
+        return mRootView;
     }
 
     @Override
@@ -114,7 +107,6 @@ public class TotalFragment extends Fragment
         super.onPause();
         new SaveTotalsAsyncTask().execute("");
     }
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -162,7 +154,7 @@ public class TotalFragment extends Fragment
      * Saves entered screen data to the database.
      * @return return true if successful.
      */
-    private boolean saveTotals() {
+    public boolean saveTotals() {
         Log.d(LOG_TAG, "Saving totals");
         Uri totalUri = ScoreContract.ScoreEntry.CONTENT_URI;
 

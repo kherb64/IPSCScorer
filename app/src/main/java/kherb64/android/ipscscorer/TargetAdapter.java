@@ -21,8 +21,7 @@ import kherb64.android.ipscscorer.data.ScoreContract;
  * Exposes list of targets
  * from a {@link android.database.Cursor} to a {@link android.widget.ListView}.
  */
-public class TargetAdapter extends CursorAdapter
-    implements TargetFragment.Callback {
+public class TargetAdapter extends CursorAdapter {
 
     private static final String LOG_TAG = TargetAdapter.class.getSimpleName();
 
@@ -30,11 +29,7 @@ public class TargetAdapter extends CursorAdapter
     private static final int VIEW_TYPE_PAPER = 1;
     private static final int VIEW_TYPE_COUNT = 2;
     private static final boolean USE_STEEL_LAYOUT = false;
-    private final TargetFragment mTargetFragment;
 
-    // TODO check for improvement for clicking
-    // bsser im fragment
-    // for clicking
     private Context mContext;
     private ListView mListView;
 
@@ -42,6 +37,7 @@ public class TargetAdapter extends CursorAdapter
      * Cache of the children views for a forecast list item.
      */
     public static class ViewHolder {
+        public int targetNum;
         public final TextView target;
         public final Button scoreBtnA;
         public final Button scoreBtnB;
@@ -63,7 +59,6 @@ public class TargetAdapter extends CursorAdapter
         super(context, c, flags);
         mContext = context;
         mListView = null;
-        mTargetFragment = null;
     }
 
     public TargetAdapter(Context context, Cursor c, int flags,
@@ -71,13 +66,10 @@ public class TargetAdapter extends CursorAdapter
         super(context, c, flags);
         mContext = context;
         mListView = listView;
-        // TODO pfui
-        mTargetFragment = (TargetFragment) fragment;
     }
 
-    public int getItemViewType(Cursor cursor) {
-        if (cursor.getString(TargetFragment.COL_TARGET_TYPE).equals(
-                ScoreContract.TargetEntry.TARGET_TYPE_STEEL))
+    public int getItemViewType(String targetType) {
+        if (targetType.equals(ScoreContract.TargetEntry.TARGET_TYPE_STEEL))
             return VIEW_TYPE_STEEL;
         else return VIEW_TYPE_PAPER;
     }
@@ -94,26 +86,26 @@ public class TargetAdapter extends CursorAdapter
         ViewHolder viewHolder = new ViewHolder(view);
         view.setTag(viewHolder);
 
-        viewHolder.scoreBtnA.setOnClickListener(onScoreBtnClickListener);
-        viewHolder.scoreBtnB.setOnClickListener(onScoreBtnClickListener);
-        viewHolder.scoreBtnC.setOnClickListener(onScoreBtnClickListener);
-        viewHolder.scoreBtnD.setOnClickListener(onScoreBtnClickListener);
-        viewHolder.scoreBtnM.setOnClickListener(onScoreBtnClickListener);
-
+        if (MainActivity.USE_ADAPTER_CLICKS) {
+            viewHolder.scoreBtnA.setOnClickListener(onScoreBtnClickListener);
+            viewHolder.scoreBtnB.setOnClickListener(onScoreBtnClickListener);
+            viewHolder.scoreBtnC.setOnClickListener(onScoreBtnClickListener);
+            viewHolder.scoreBtnD.setOnClickListener(onScoreBtnClickListener);
+            viewHolder.scoreBtnM.setOnClickListener(onScoreBtnClickListener);
+        }
         return view;
     }
 
     private View.OnClickListener onScoreBtnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            // TODO move clicking from adapter to fragment
+            // TODO move clicking from adapter to fragment,
+            // but this is too difficult for me now.
             Button button = (Button) v;
             int position = mListView.getPositionForView((View) v.getParent());
 
-            // save to mPosition in TargetFragment
-            // TODO do not directly communicate with fragment but rather with the activity,
-            // which will inform the fragment.
-            mTargetFragment.setPosition(position);
+            MainActivity activity = (MainActivity) mContext;
+            activity.onTargetSelected(position);
 
             // move cursor to position
             Cursor cursor = getCursor();
@@ -128,13 +120,17 @@ public class TargetAdapter extends CursorAdapter
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
 
-        ViewHolder viewHolder = (ViewHolder) view.getTag();
+        // Read target info from cursor
+        String targetType = cursor.getString(TargetFragment.COL_TARGET_TYPE);
+        int viewType = getItemViewType(targetType);
+        int targetNum = cursor.getInt(TargetFragment.COL_TARGET_NUM);
 
-        // Read target Type from cursor
-        int viewType = getItemViewType(cursor);
-        // Read target number from cursor
-        viewHolder.target.setText(cursor.getString(TargetFragment.COL_TARGET_TYPE)
-                + cursor.getInt(TargetFragment.COL_TARGET_NUM));
+        // store target number in viewholer. Why?
+        ViewHolder viewHolder = (ViewHolder) view.getTag();
+        viewHolder.targetNum = targetNum;
+
+        // Write target label
+        viewHolder.target.setText(targetType + targetNum);
 
         showScores(viewHolder, context, cursor, viewType);
 
@@ -164,24 +160,27 @@ public class TargetAdapter extends CursorAdapter
                            String name, int score) {
         // get button
         Button button = viewHolderButton(context, viewHolder, name);
+        if (button != null) {
 
-        // get visibility, text and color
-        int visibility = scoreVisibility(context, viewType, name);
-        String scoreText = scoreText(viewType, name, score);
-        int color = scoreColor(score);
+            // get visibility, text and color
+            int visibility = scoreVisibility(context, viewType, name);
+            String scoreText = scoreText(viewType, name, score);
+            int color = scoreColor(score);
 
-        // set visibility
-        // weird, must use the if construct cannot not use my visibility variable!
-        if (visibility == View.VISIBLE && button.getVisibility() != View.VISIBLE)
-            button.setVisibility(View.VISIBLE);
-        if (visibility == View.INVISIBLE && button.getVisibility() != View.INVISIBLE)
-            button.setVisibility(View.INVISIBLE);
+            // set visibility
+            // weird, must use the if construct cannot not use my visibility variable!
+            if (visibility == View.VISIBLE && button.getVisibility() != View.VISIBLE)
+                button.setVisibility(View.VISIBLE);
+            if (visibility == View.INVISIBLE && button.getVisibility() != View.INVISIBLE)
+                button.setVisibility(View.INVISIBLE);
 
-        // set text
-        if (!button.getText().equals(scoreText)) button.setText(scoreText);
+            // set text
 
-        // set color
-        button.setTextColor(color);
+            if (!button.getText().equals(scoreText)) button.setText(scoreText);
+
+            // set color
+            button.setTextColor(color);
+        }
     }
 
     private String scoreText(int viewType, String name, int score) {
@@ -282,8 +281,4 @@ public class TargetAdapter extends CursorAdapter
         else return ScoreContract.TargetEntry.MAX_SCORE_PAPER;
     }
 
-    @Override
-    public void onItemSelected(Uri targetUri) {
-
-    }
 }

@@ -21,12 +21,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import kherb64.android.ipscscorer.data.ScoreContract;
 
 /**
- * Created by herb on 22.03.15.
+ * Fragment for non target based scores.
  */
 public class ScoreFragment extends Fragment
     implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -131,14 +130,7 @@ public class ScoreFragment extends Fragment
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_build_targets) {
-            // TODO add input dialog and save to preferences
-            // starting point: custom alert dialog
-            Toast.makeText(mContext, mContext.getString(R.string.use_settings_for_buildTargets),
-                    Toast.LENGTH_SHORT).show();
-            // buildTargets();
-            return true;
-        } else if (id == R.id.action_clear_score) {
+        if (id == R.id.action_clear_score) {
             new ClearScoreAsyncTask().execute("");
             return true;
         }
@@ -174,15 +166,15 @@ public class ScoreFragment extends Fragment
         ViewHolder viewHolder = (ViewHolder) mRootView.getTag();
         if (view.getId() == R.id.btn_score_pt) {
             mScorePT++;
-            viewHolder.btn_pt.setText(mScorePT + " PT");
+            viewHolder.btn_pt.setText(mScorePT + " " + mContext.getString(R.string.score_pt));
         }
         if (view.getId() == R.id.btn_score_prc) {
             mScorePRC++;
-            viewHolder.btn_prc.setText(mScorePRC + " PRC");
+            viewHolder.btn_prc.setText(mScorePRC + " " + mContext.getString(R.string.score_prc));
         }
         if (view.getId() == R.id.btn_score_dq) {
             mScoreDQ = 1 - mScoreDQ;
-            viewHolder.btn_dq.setText(mScoreDQ + " DQ");
+            viewHolder.btn_dq.setText(mScoreDQ + " " + mContext.getString(R.string.score_dq));
         }
         if (view.getId() == R.id.btn_score_factor) {
             mScoreFactor = 1 - mScoreFactor;
@@ -226,9 +218,9 @@ public class ScoreFragment extends Fragment
             mScorePT = data.getInt(COL_TOTAL_PT);
             mScorePRC = data.getInt(COL_TOTAL_PRC);
             mScoreDQ = data.getInt(COL_TOTAL_DQ);
-            viewHolder.btn_pt.setText(mScorePT + " PT");
-            viewHolder.btn_prc.setText(mScorePRC + " PRC");
-            viewHolder.btn_dq.setText(mScoreDQ + " DQ");
+            viewHolder.btn_pt.setText(mScorePT + " " + mContext.getString(R.string.score_pt));
+            viewHolder.btn_prc.setText(mScorePRC + " " + mContext.getString(R.string.score_prc));
+            viewHolder.btn_dq.setText(mScoreDQ + " " + mContext.getString(R.string.score_dq));
         }
     }
 
@@ -249,7 +241,7 @@ public class ScoreFragment extends Fragment
      * Saves entered screen data to the database.
      * @return return true if successful.
      */
-    private boolean saveScore() {
+    public boolean saveScore() {
         Log.d(LOG_TAG, "Saving score");
         Uri scoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
 
@@ -287,16 +279,7 @@ public class ScoreFragment extends Fragment
     /**
      * Clears the score value from the database.
      */
-    private void clearScore() {
-        /* clear on screen
-        ViewHolder viewHolder = (ViewHolder) mRootView.getTag();
-        mScorePT = 0;
-        mScorePRC = 0;
-        mScoreDQ = 0;
-        viewHolder.btn_pt.setText(mScorePT + " PT");
-        viewHolder.btn_prc.setText(mScorePRC + " PRC");
-        viewHolder.btn_dq.setText(mScoreDQ + " DQ"); */
-
+    public void clearScore() {
         // get score
         Uri scoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
         Cursor cursor = mContext.getContentResolver().query(scoreUri, null, null, null, null);

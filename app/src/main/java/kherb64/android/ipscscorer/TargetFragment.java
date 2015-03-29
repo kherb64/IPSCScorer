@@ -1,20 +1,15 @@
 package kherb64.android.ipscscorer;
 
-import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import kherb64.android.ipscscorer.data.ScoreContract;
 
@@ -61,11 +55,12 @@ public class TargetFragment extends Fragment
     };
 
     private final int TARGET_LOADER = 0;
-    private int mPosition;
     private TargetAdapter mTargetAdapter;
     private ListView mListView;
     private Context mContext;
+    MainActivity mMainActivity;
     private int mFirstVisiblePosition;
+    private int mPosition;
 
 
     public TargetFragment() {
@@ -89,6 +84,7 @@ public class TargetFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mContext = getActivity();
+        mMainActivity = (MainActivity) mContext;
 
         View rootView = inflater.inflate(R.layout.fragment_targets, container, false);
         mListView = (ListView) rootView.findViewById(R.id.listview_targets);
@@ -106,8 +102,8 @@ public class TargetFragment extends Fragment
                 mFirstVisiblePosition = savedInstanceState.getInt(FIRST_VISIBLE_POSITION);
         }
 
-        // this late?
-        buildInitialTargets();
+        mMainActivity.buildInitialTargets();
+
         return rootView;
     }
 
@@ -121,14 +117,10 @@ public class TargetFragment extends Fragment
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_build_targets) {
-            // TODO add input dialog and save to preferences
-            // starting point: custom alert dialog
-            Toast.makeText(mContext, mContext.getString(R.string.use_settings_for_buildTargets),
-                    Toast.LENGTH_SHORT).show();
-            // buildTargets();
+            showBuildTargetsDialog();
             return true;
         } else if (id == R.id.action_clear_scores) {
-            new ClearAllTargetScoresAsyncTask().execute("");
+            mMainActivity.clearAllTargetScores();
             return true;
         } else if (id == R.id.action_settings) {
             Intent settings = new Intent(getActivity(), SettingsActivity.class);
@@ -140,31 +132,12 @@ public class TargetFragment extends Fragment
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == SETTINGS_REQUEST) {
-            if (resultCode == Activity.RESULT_OK) {
-                boolean targetsChanged = data.getBooleanExtra(SettingsActivity.TARGETS_CHANGED, false);
-                Log.v(LOG_TAG, "Targets changed? " + targetsChanged);
-                if (targetsChanged) {
-                    new BuildTargetsAsyncTask().execute("");
-                }
-            }
-        }
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         // get first position on screen
         mFirstVisiblePosition = mListView.getFirstVisiblePosition();
-        if (mFirstVisiblePosition != ListView.INVALID_POSITION) {
-            outState.putInt(FIRST_VISIBLE_POSITION, mFirstVisiblePosition);
-        }
-        // do not use for orientation change
-        if (mPosition != ListView.INVALID_POSITION) {
-            outState.putInt(SELECTED_KEY, mPosition);
-        }
+        outState.putInt(FIRST_VISIBLE_POSITION, mFirstVisiblePosition);
+        mPosition = mMainActivity.selectedTarget();
+        outState.putInt(SELECTED_KEY, mPosition);
         super.onSaveInstanceState(outState);
     }
 
@@ -186,11 +159,9 @@ public class TargetFragment extends Fragment
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         // Swap the new cursor in. (The framework will take care of closing the
         // old cursor once we return.)
-
         mTargetAdapter.swapCursor(data);
 
-        // TODO check scrolling after clicking AND after orientation change
-        // invalidatt on scroll?
+        // invalidated in MainActivity.onCreate
         if (mPosition != ListView.INVALID_POSITION) {
             // use when clicking
             mListView.smoothScrollToPosition(mPosition);
@@ -210,248 +181,16 @@ public class TargetFragment extends Fragment
         }
     }
 
-    /**
-     * Shows targets stored in database. If non exist, then targets according to
-     * preferences are built.
-     */
-    // TODO check is necessary: No!
-    private void showTargets() {
-        Log.d(LOG_TAG, "Showing targets");
-        Context context = getActivity();
-
-        // are there any targets in the database?
-        Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
-        Cursor cursor = context.getContentResolver().query(targetUri, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            Log.d(LOG_TAG, cursor.getCount() + " Targets found in database");
-        } else {
-            new BuildTargetsAsyncTask().execute("");
-
-            // Call Loader
-            getLoaderManager().restartLoader(TARGET_LOADER, null, this);
-        }
-        cursor.close();
-    }
-
-    /**
-     * Builds targets when there are none in the database. This helps showing some targets when
-     * the application is run for the first time.
-     */
-    private void buildInitialTargets() {
-            int numSteelDb = numTargetsDb(ScoreContract.TargetEntry.TARGET_TYPE_STEEL);
-            int numPaperDb = numTargetsDb(ScoreContract.TargetEntry.TARGET_TYPE_PAPER);
-            int numSteelPrefs = numTargetsPrefs(ScoreContract.TargetEntry.TARGET_TYPE_STEEL);
-            int numPaperPRefs = numTargetsPrefs(ScoreContract.TargetEntry.TARGET_TYPE_PAPER);
-            if (numSteelDb == 0 && numSteelPrefs > 0
-                    || numPaperDb == 0 && numPaperPRefs > 0) {
-                new BuildTargetsAsyncTask().execute("");
-            }
-            else if (numSteelDb != numSteelPrefs
-                    || numPaperDb != numPaperPRefs)
-                Log.w(LOG_TAG, "Your number of targets does not match your settings");
-    }
-
-    /**
-     * Returns the number of targets in the database.
-     *
-     * @param targetType name of target type defined in ScoreContract.TargetEntry.
-     * @return returns the number of targets.
-     */
-    private int numTargetsDb(String targetType) {
-        int cnt = 0;
-        Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
-        Cursor cursor = mContext.getContentResolver().query(targetUri, null,
-                null, null, null);
-        if (cursor.moveToFirst()) {
-            cnt = cursor.getCount();
-        }
-        cursor.close();
-        return cnt;
-    }
-
-    /**
-     * Returns the number of targets in the settings.
-     *
-     * @param targetType name of target type defined in ScoreContract.TargetEntry.
-     * @return returns the number of targets.
-     */
-    private int numTargetsPrefs(String targetType) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String defaultValue = "";
-        String prefValue = "";
-        if (targetType.equals(ScoreContract.TargetEntry.TARGET_TYPE_STEEL)) {
-            defaultValue = mContext.getString(R.string.pref_steel_targets_default);
-            prefValue = prefs.getString(mContext.getString(R.string.pref_steel_targets_key), defaultValue);
-
-        // TODO improve coding for preferences integer value retrieval
-            // so!
-            //String prefName =  mContext.getString(R.string.pref_steel_targets_key);
-            // so net! int i = prefs.getInt(prefName, 1);
-            return Integer.parseInt(prefValue);
-        } else if (targetType.equals(ScoreContract.TargetEntry.TARGET_TYPE_PAPER)) {
-            defaultValue = mContext.getString(R.string.pref_paper_targets_default);
-            prefValue = prefs.getString(mContext.getString(R.string.pref_paper_targets_key), defaultValue);
-            return Integer.parseInt(prefValue);
-        }
-        return 0;
-    }
-
-
-    /**
-     * Builds targets in the database taking the numbers form the settings.
-     *
-     * @return Returns number of targets built.
-     */
-    public int buildTargets() {
-        Log.d(LOG_TAG, "Building targets");
-
-        // invalidate clicked position
-        mPosition = ListView.INVALID_POSITION;
-        int steelCount = numTargetsPrefs(ScoreContract.TargetEntry.TARGET_TYPE_STEEL);
-        int paperCount = numTargetsPrefs(ScoreContract.TargetEntry.TARGET_TYPE_PAPER);
-
-        // call the build function
-        int numTargets = rebuildTargets(steelCount, paperCount);
-        if (numTargets == 0)
-            Toast.makeText(mContext, R.string.no_targets_built, Toast.LENGTH_SHORT).show();
-        // no need to toast the user when targets have been created, because he sees them.
-        return numTargets;
-    }
-
-
-    /**
-     * Builds targets in the database taking the given numbers. Deletes any old targets in advance.
-     *
-     * @param steelCount number of steel targets to be built.
-     * @param paperCount number of paper targets to be built.
-     * @return returns number of targets created.
-     */
-    public int rebuildTargets(int steelCount, int paperCount) {
-        Log.d(LOG_TAG, "Rebuilding " + steelCount + " + " + paperCount + " targets");
-        Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
-
-        // remove old targets
-        int deleted = mContext.getContentResolver().delete(targetUri, null, null);
-        Log.d(LOG_TAG, deleted + " old Targets deleted");
-
-        // create new targets
-        ContentValues targetValues = new ContentValues();
-
-        // TODO improve performace by bulk load!
-        // check mor than one row in Contenvalues
-        int targetsCreated = 0;
-        for (int i = 0; i < steelCount; i++) {
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_TARGET_NUMBER, i + 1);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_TARGET_TYPE,
-                    ScoreContract.TargetEntry.TARGET_TYPE_STEEL);
-            mContext.getContentResolver().insert(targetUri, targetValues);
-            targetsCreated++;
-        }
-        for (int i = steelCount; i < steelCount + paperCount; i++) {
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_TARGET_NUMBER, i + 1);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_TARGET_TYPE,
-                    ScoreContract.TargetEntry.TARGET_TYPE_PAPER);
-            mContext.getContentResolver().insert(targetUri, targetValues);
-            targetsCreated++;
-        }
-        Log.d(LOG_TAG, targetsCreated + " targets created");
-        return targetsCreated;
-    }
-
-    /**
-     * Clears each score from each target in the database.
-     */
-    private void clearAllTargetScores() {
-        Log.d(LOG_TAG, "Clearing all target scores");
-        mPosition = ListView.INVALID_POSITION;
-
-        // are there any targets in the database?
-        Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
-        Cursor cursor = mContext.getContentResolver().query(targetUri, null, null, null, null);
-
-        // any targets available?
-        if (cursor.moveToFirst()) {
-
-            // update score columns
-            ContentValues targetValues = new ContentValues();
-
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_A, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_B, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_C, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_D, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_M, 0);
-
-            // no selection, so update all rows
-            int updated = mContext.getContentResolver().update(targetUri, targetValues, null, null);
-            Log.d(LOG_TAG, updated + " target scores cleared");
-        }
-        cursor.close();
-    }
-
-    /**
-     * Clears each score from the given target number in the database.
-     */
-    private void clearTargetScores(int targetNum) {
-        Log.d(LOG_TAG, "Clearing scores of target " + targetNum);
-
-        Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
-        String selection = ScoreContract.TargetEntry.COLUMN_TARGET_NUMBER + " = ? ";
-        String[] args = {Integer.toString(targetNum)};
-        Cursor cursor = mContext.getContentResolver().query(targetUri, null,
-                selection, args, null);
-        // any targets available?
-        if (cursor.moveToFirst()) {
-
-            // update score columns
-            ContentValues targetValues = new ContentValues();
-
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_A, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_B, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_C, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_D, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_M, 0);
-
-            // no selection, so update all rows
-            mContext.getContentResolver().update(targetUri, targetValues, selection, args);
-        }
-        cursor.close();
-    }
-
-    public void setPosition(int position) {
+    /*
+    public void setPosition (int position) {
         mPosition = position;
     }
+    */
 
-
-    class ClearAllTargetScoresAsyncTask extends AsyncTask<String, String, String> {
-        @Override
-        protected String doInBackground(String... strings) {
-            clearAllTargetScores();
-            return null;
-        }
+    private void showBuildTargetsDialog () {
+        DialogFragment dialog = new BuildTargetsDialogFragment();
+        dialog.show(getFragmentManager(), "bertl");
     }
-
-    class ClearTargetScoresAsyncTask extends AsyncTask<String, String, String> {
-
-        private final int mTargetNum;
-
-        ClearTargetScoresAsyncTask(int targetNum) {
-            mTargetNum = targetNum;
-        }
-        @Override
-        protected String doInBackground(String... strings) {
-            clearTargetScores(mTargetNum);
-            return null;
-        }
-    }
-
-    class BuildTargetsAsyncTask extends AsyncTask<String, String, String> {
-        @Override
-        protected String doInBackground(String... strings) {
-            buildTargets();
-            return null;
-        }
-    }
-
 
     /**
      * A callback interface that all activities containing this fragment must
@@ -462,7 +201,7 @@ public class TargetFragment extends Fragment
         /**
          * DetailFragmentCallback for when an item has been selected.
          */
-        public void onItemSelected(Uri targetUri);
+        void onTargetSelected(int position);
     }
 
 }
