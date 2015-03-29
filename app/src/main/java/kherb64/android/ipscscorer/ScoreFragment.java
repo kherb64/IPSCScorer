@@ -134,7 +134,7 @@ public class ScoreFragment extends Fragment
             new ClearScoreAsyncTask().execute("");
             return true;
         }
-
+        // TODO add sharing content
         return super.onOptionsItemSelected(item);
     }
 

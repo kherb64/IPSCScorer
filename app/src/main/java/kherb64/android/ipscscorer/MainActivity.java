@@ -34,7 +34,6 @@ public class MainActivity extends ActionBarActivity
 
     // sad, but it doesn't work otherwise
     public static final boolean USE_ADAPTER_CLICKS = true;
-    private TargetFragment mTargetFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +45,9 @@ public class MainActivity extends ActionBarActivity
         if (findViewById(R.id.fragment_score) != null) {
             mTwoPane = true;
         }
+        // TODO add explicit tablet layout
 
+        // initialization for intelligent scrolling after rotating and/or target clicking
         mPosition = ListView.INVALID_POSITION;
     }
 
@@ -118,7 +119,7 @@ public class MainActivity extends ActionBarActivity
             editor.putString(mContext.getString(R.string.pref_paper_targets_key),
                     Integer.toString(count));
         }
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -236,6 +237,9 @@ public class MainActivity extends ActionBarActivity
      * Clears each score from each target in the database.
      */
     public void clearAllTargetScores() {
+        new ClearAllTargetScoresAsyncTask().execute("");
+    }
+    private void clearAllTargetScores2() {
         Log.d(LOG_TAG, "Clearing all target scores");
         mPosition = ListView.INVALID_POSITION;
 
@@ -266,6 +270,10 @@ public class MainActivity extends ActionBarActivity
      * Clears each score from the given target number in the database.
      */
     public void clearTargetScores(int targetNum) {
+        new ClearTargetScoresAsyncTask(targetNum).execute("");
+    }
+
+    private void clearTargetScores2(int targetNum) {
         Log.d(LOG_TAG, "Clearing scores of target " + targetNum);
 
         Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
@@ -294,7 +302,7 @@ public class MainActivity extends ActionBarActivity
     class ClearAllTargetScoresAsyncTask extends AsyncTask<String, String, String> {
         @Override
         protected String doInBackground(String... strings) {
-            clearAllTargetScores();
+            clearAllTargetScores2();
             return null;
         }
     }
@@ -308,15 +316,7 @@ public class MainActivity extends ActionBarActivity
         }
         @Override
         protected String doInBackground(String... strings) {
-            clearTargetScores(mTargetNum);
-            return null;
-        }
-    }
-
-    class BuildTargetsAsyncTask extends AsyncTask<String, String, String> {
-        @Override
-        protected String doInBackground(String... strings) {
-            buildTargets();
+            clearTargetScores2(mTargetNum);
             return null;
         }
     }
@@ -333,14 +333,6 @@ public class MainActivity extends ActionBarActivity
         @Override
         protected String doInBackground(String... strings) {
             rebuildTargets2(msteelCount, mPaperCount);
-            return null;
-        }
-    }
-
-    class BuildInitialTargetsAsyncTask extends AsyncTask<String, String, String> {
-        @Override
-        protected String doInBackground(String... strings) {
-            buildInitialTargets();
             return null;
         }
     }

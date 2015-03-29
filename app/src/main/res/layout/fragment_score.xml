@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="4dp">
 
         <!-- shooter line -->
         <LinearLayout
@@ -15,13 +17,18 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/abc_action_button_min_height_material"
+                android:gravity="center_vertical"
+                android:text="@string/Shooter"/>
+
             <EditText
                 android:id="@+id/score_shooter"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/abc_action_button_min_height_material"
-                android:gravity="center_vertical"
-                android:hint="@string/Shooter" />
+                android:gravity="center_vertical"/>
 
             <Button
                 android:id="@+id/btn_score_factor"
@@ -39,6 +46,12 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/abc_action_button_min_height_material"
+                android:gravity="center_vertical"
+                android:hint="@string/Time"/>
+
             <EditText
                 android:id="@+id/score_time"
                 android:layout_weight="1"
@@ -46,8 +59,13 @@
                 android:layout_height="@dimen/abc_action_button_min_height_material"
                 android:gravity="center_vertical"
                 android:layout_gravity="left"
-                android:inputType="time"
-                android:hint="@string/Time" />
+                android:inputType="time"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/abc_action_button_min_height_material"
+                android:gravity="center_vertical"
+                android:hint="@string/num_shots"/>
 
             <EditText
                 android:id="@+id/score_num_shots"
@@ -55,8 +73,7 @@
                 android:layout_height="@dimen/abc_action_button_min_height_material"
                 android:gravity="center_vertical"
                 android:layout_gravity="right"
-                android:inputType="number"
-                android:hint="@string/num_shots" />
+                android:inputType="number"/>
         </LinearLayout>
 
         <EditText
