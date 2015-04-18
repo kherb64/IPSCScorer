@@ -305,7 +305,7 @@ public class ScoreFragment extends Fragment
      * @return Returns an intent for the ShareActionProvider
      */
     private Intent createShareScoreIntent() {
-        // TODO bugfix: how to get the content from the screen rather form the database
+        // TODO bugfix: how to get fresh content from the screen and/or the database
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         shareIntent.setType("text/plain");
