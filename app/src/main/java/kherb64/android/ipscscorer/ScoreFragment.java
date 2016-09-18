@@ -95,16 +95,16 @@ public class ScoreFragment extends Fragment
      * Cache of the children views for a forecast list item.
      */
     public static class ViewHolder {
-        public final EditText shooter;
-        public final Button btn_factor;
-        public final EditText time;
-        public final EditText num_shots;
-        public final EditText comment;
-        public final Button btn_pt;
-        public final Button btn_prc;
-        public final Button btn_dq;
+        final EditText shooter;
+        final Button btn_factor;
+        final EditText time;
+        final EditText num_shots;
+        final EditText comment;
+        final Button btn_pt;
+        final Button btn_prc;
+        final Button btn_dq;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             shooter = (EditText) view.findViewById(R.id.score_shooter);
             btn_factor = (Button) view.findViewById(R.id.btn_score_factor);
             time = (EditText) view.findViewById(R.id.score_time);
@@ -192,7 +192,6 @@ public class ScoreFragment extends Fragment
     private View.OnClickListener onScoreBtnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Button button = (Button) v;
             increaseScore(v);
         }
     };
@@ -284,7 +283,7 @@ public class ScoreFragment extends Fragment
         mScoreShareText = mContext.getString(R.string.app_name) + " " + SCORE_SHARE_HASHTAG
                 + "\nParcours: " + parcours
                 + "\nShooter: " + shooter
-                + "\nFactoR: " + factorName(mScoreFactor)
+                + "\nFactor: " + factorName(mScoreFactor)
                 + "\nTime: " + time
                 + "\nShots: " + numShots
                 + "\n" + totalsString
@@ -351,18 +350,20 @@ public class ScoreFragment extends Fragment
         // score available?
         Cursor cursor = mContext.getContentResolver().query(scoreUri, null,
                 null, null, null);
-        if (cursor.moveToFirst()) {
-            String targetType = cursor.getString(TargetFragment.COL_TARGET_TYPE);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                String targetType = cursor.getString(TargetFragment.COL_TARGET_TYPE);
 
-            // update score column
-            // no selection, so update all rows
-            mContext.getContentResolver().update(scoreUri, scoreValues, null, null);
-            Log.d(LOG_TAG, "Score updated");
-        } else {
-            mContext.getContentResolver().insert(scoreUri, scoreValues);
-            Log.d(LOG_TAG, "Score inserted");
+                // update score column
+                // no selection, so update all rows
+                mContext.getContentResolver().update(scoreUri, scoreValues, null, null);
+                Log.d(LOG_TAG, targetType + " Score updated");
+            } else {
+                mContext.getContentResolver().insert(scoreUri, scoreValues);
+                Log.d(LOG_TAG, "Score inserted");
+            }
+            cursor.close();
         }
-        cursor.close();
         return true;
     }
 
@@ -375,28 +376,31 @@ public class ScoreFragment extends Fragment
         Cursor cursor = mContext.getContentResolver().query(scoreUri, null, null, null, null);
 
         // is there a score in the database?
-        if (cursor.moveToFirst()) {
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
 
-            // update score columns
-            ContentValues scoreValues = new ContentValues();
+                // update score columns
+                ContentValues scoreValues = new ContentValues();
 
-            scoreValues.put(ScoreContract.ScoreEntry.COLUMN_SHOOTER, "");
-            scoreValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_PT, 0);
-            scoreValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_PRC, 0);
-            scoreValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_DQ, 0);
-            scoreValues.put(ScoreContract.ScoreEntry.COLUMN_FACTOR, ScoreContract.ScoreEntry.FACTOR_MINOR);
-            scoreValues.put(ScoreContract.ScoreEntry.COLUMN_NUM_SHOTS, 0);
-            scoreValues.put(ScoreContract.ScoreEntry.COLUMN_TIME, 0);
-            scoreValues.put(ScoreContract.ScoreEntry.COLUMN_COMMENT, "");
+                scoreValues.put(ScoreContract.ScoreEntry.COLUMN_SHOOTER, "");
+                scoreValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_PT, 0);
+                scoreValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_PRC, 0);
+                scoreValues.put(ScoreContract.ScoreEntry.COLUMN_TOTAL_DQ, 0);
+                scoreValues.put(ScoreContract.ScoreEntry.COLUMN_FACTOR, ScoreContract.ScoreEntry.FACTOR_MINOR);
+                scoreValues.put(ScoreContract.ScoreEntry.COLUMN_NUM_SHOTS, 0);
+                scoreValues.put(ScoreContract.ScoreEntry.COLUMN_TIME, 0);
+                scoreValues.put(ScoreContract.ScoreEntry.COLUMN_COMMENT, "");
 
-            // no selection, so update all rows
-            mContext.getContentResolver().update(scoreUri, scoreValues, null, null);
+                // no selection, so update all rows
+                mContext.getContentResolver().update(scoreUri, scoreValues, null, null);
+            }
+            cursor.close();
         }
-        cursor.close();
     }
 
     /**
      * Retrieves the total target scores fresh from the database.
+     *
      * @return Returns a list of integers representing the total target scores. The items are
      * always sorted by this target sequence: A, B, C, D, M and the grand total.
      */
@@ -413,18 +417,20 @@ public class ScoreFragment extends Fragment
 
         Cursor cursor = mContext.getContentResolver().query(mTargetUri, TARGET_COLUMNS,
                 null, null, null);
-        if (cursor.moveToFirst()) {
-            do {
-                scoreA += cursor.getInt(COL_TOTAL_A);
-                scoreB += cursor.getInt(COL_TOTAL_B);
-                scoreC += cursor.getInt(COL_TOTAL_C);
-                scoreD += cursor.getInt(COL_TOTAL_D);
-                scoreM += cursor.getInt(COL_TOTAL_M);
-            } while (cursor.moveToNext());
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    scoreA += cursor.getInt(COL_TOTAL_A);
+                    scoreB += cursor.getInt(COL_TOTAL_B);
+                    scoreC += cursor.getInt(COL_TOTAL_C);
+                    scoreD += cursor.getInt(COL_TOTAL_D);
+                    scoreM += cursor.getInt(COL_TOTAL_M);
+                } while (cursor.moveToNext());
 
-            scoreTotal = scoreA + scoreB + scoreC + scoreD + scoreM;
+                scoreTotal = scoreA + scoreB + scoreC + scoreD + scoreM;
+            }
+            cursor.close();
         }
-        cursor.close();
 
         totals.add(scoreA);
         totals.add(scoreB);

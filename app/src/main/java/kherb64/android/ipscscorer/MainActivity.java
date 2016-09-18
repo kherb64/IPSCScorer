@@ -23,7 +23,7 @@ import kherb64.android.ipscscorer.data.ScoreContract;
 
 
 public class MainActivity extends ActionBarActivity
-    implements BuildTargetsDialogFragment.BuildTargetsDialogListener,
+        implements BuildTargetsDialogFragment.BuildTargetsDialogListener,
         TargetFragment.Callback {
 
     public static final int MAX_NUM_TARGETS = 99;
@@ -85,6 +85,7 @@ public class MainActivity extends ActionBarActivity
         Toast.makeText(this, "Targets remain unchanged", Toast.LENGTH_SHORT).show();
     }
 
+
     /**
      * Returns the number of targets in the settings.
      *
@@ -133,11 +134,11 @@ public class MainActivity extends ActionBarActivity
         if (numSteelDb == 0 && numSteelPrefs > 0
                 || numPaperDb == 0 && numPaperPRefs > 0) {
             buildTargets();
-        }
-        else if (numSteelDb != numSteelPrefs
+        } else if (numSteelDb != numSteelPrefs
                 || numPaperDb != numPaperPRefs)
             Log.w(LOG_TAG, "Your number of targets does not match your settings");
     }
+
     /**
      * Returns the number of targets in the database.
      *
@@ -148,13 +149,15 @@ public class MainActivity extends ActionBarActivity
         int cnt = 0;
         Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
         String selection = ScoreContract.TargetEntry.COLUMN_TARGET_TYPE + " = ?";
-        String[] selectionArgs = { targetType };
+        String[] selectionArgs = {targetType};
         Cursor cursor = mContext.getContentResolver().query(targetUri, null,
                 selection, selectionArgs, null);
-        if (cursor.moveToFirst()) {
-            cnt = cursor.getCount();
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                cnt = cursor.getCount();
+            }
+            cursor.close();
         }
-        cursor.close();
         return cnt;
     }
 
@@ -177,6 +180,7 @@ public class MainActivity extends ActionBarActivity
     /**
      * Builds targets in the database taking the given numbers. Deletes any old targets in advance.
      * Performs it's work via AsyncTask.
+     *
      * @param steelCount number of steel targets to be built.
      * @param paperCount number of paper targets to be built.
      */
@@ -186,6 +190,7 @@ public class MainActivity extends ActionBarActivity
 
     /**
      * Local worker that will do the work. Typically Called by AsyncTask.
+     *
      * @param steelCount Number of steel targets to be built.
      * @param paperCount Number of paper targets to be built.
      * @return Returns the number of targets that have been created.
@@ -257,23 +262,25 @@ public class MainActivity extends ActionBarActivity
         Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
         Cursor cursor = mContext.getContentResolver().query(targetUri, null, null, null, null);
 
-        // any targets available?
-        if (cursor.moveToFirst()) {
+        if (cursor != null) {
+            // any targets available?
+            if (cursor.moveToFirst()) {
 
-            // update score columns
-            ContentValues targetValues = new ContentValues();
+                // update score columns
+                ContentValues targetValues = new ContentValues();
 
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_A, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_B, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_C, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_D, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_M, 0);
+                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_A, 0);
+                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_B, 0);
+                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_C, 0);
+                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_D, 0);
+                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_M, 0);
 
-            // no selection, so update all rows
-            int updated = mContext.getContentResolver().update(targetUri, targetValues, null, null);
-            Log.d(LOG_TAG, updated + " target scores cleared");
+                // no selection, so update all rows
+                int updated = mContext.getContentResolver().update(targetUri, targetValues, null, null);
+                Log.d(LOG_TAG, updated + " target scores cleared");
+            }
+            cursor.close();
         }
-        cursor.close();
     }
 
     /**
@@ -295,22 +302,24 @@ public class MainActivity extends ActionBarActivity
         String[] args = {Integer.toString(targetNum)};
         Cursor cursor = mContext.getContentResolver().query(targetUri, null,
                 selection, args, null);
-        // any targets available?
-        if (cursor.moveToFirst()) {
+        if (cursor != null) {
+            // any targets available?
+            if (cursor.moveToFirst()) {
 
-            // update score columns
-            ContentValues targetValues = new ContentValues();
+                // update score columns
+                ContentValues targetValues = new ContentValues();
 
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_A, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_B, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_C, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_D, 0);
-            targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_M, 0);
+                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_A, 0);
+                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_B, 0);
+                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_C, 0);
+                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_D, 0);
+                targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_M, 0);
 
-            // no selection, so update all rows
-            mContext.getContentResolver().update(targetUri, targetValues, selection, args);
+                // no selection, so update all rows
+                mContext.getContentResolver().update(targetUri, targetValues, selection, args);
+            }
+            cursor.close();
         }
-        cursor.close();
     }
 
     class ClearAllTargetScoresAsyncTask extends AsyncTask<String, String, String> {
@@ -328,6 +337,7 @@ public class MainActivity extends ActionBarActivity
         ClearTargetScoresAsyncTask(int targetNum) {
             mTargetNum = targetNum;
         }
+
         @Override
         protected String doInBackground(String... strings) {
             clearTargetScores2(mTargetNum);
@@ -340,10 +350,11 @@ public class MainActivity extends ActionBarActivity
         private int msteelCount;
         private int mPaperCount;
 
-        RebuildTargetsAsyncTask (int steelCount, int paperCount) {
+        RebuildTargetsAsyncTask(int steelCount, int paperCount) {
             msteelCount = steelCount;
             mPaperCount = paperCount;
         }
+
         @Override
         protected String doInBackground(String... strings) {
             rebuildTargets2(msteelCount, mPaperCount);

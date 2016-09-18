@@ -58,14 +58,14 @@ public class TotalFragment extends Fragment
      * Cache of the children views for a forecast list item.
      */
     public static class ViewHolder {
-        public final TextView total_a;
-        public final TextView total_b;
-        public final TextView total_c;
-        public final TextView total_d;
-        public final TextView total_m;
-        public final TextView total_target;
+        final TextView total_a;
+        final TextView total_b;
+        final TextView total_c;
+        final TextView total_d;
+        final TextView total_m;
+        final TextView total_target;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             total_a = (TextView) view.findViewById(R.id.score_total_a);
             total_b = (TextView) view.findViewById(R.id.score_total_b);
             total_c = (TextView) view.findViewById(R.id.score_total_c);

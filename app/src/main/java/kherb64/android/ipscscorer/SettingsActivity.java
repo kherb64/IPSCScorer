@@ -45,7 +45,6 @@ public class SettingsActivity extends PreferenceActivity
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object o) {
-        String pref_key = preference.getKey();
         preference.setSummary(o.toString());
         return true;
     }

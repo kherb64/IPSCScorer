@@ -21,14 +21,15 @@ import kherb64.android.ipscscorer.data.ScoreContract;
  * Exposes list of targets
  * from a {@link android.database.Cursor} to a {@link android.widget.ListView}.
  */
-public class TargetAdapter extends CursorAdapter {
+class TargetAdapter extends CursorAdapter {
 
     private static final String LOG_TAG = TargetAdapter.class.getSimpleName();
 
     private static final int VIEW_TYPE_STEEL = 0;
     private static final int VIEW_TYPE_PAPER = 1;
     private static final int VIEW_TYPE_COUNT = 2;
-    private static final boolean USE_STEEL_LAYOUT = false;
+    private final Fragment mFragment;
+    // private static final boolean USE_STEEL_LAYOUT = false;
 
     private Context mContext;
     private ListView mListView;
@@ -36,16 +37,16 @@ public class TargetAdapter extends CursorAdapter {
     /**
      * Cache of the children views for a forecast list item.
      */
-    public static class ViewHolder {
-        public int targetNum;
-        public final TextView target;
-        public final Button scoreBtnA;
-        public final Button scoreBtnB;
-        public final Button scoreBtnC;
-        public final Button scoreBtnD;
-        public final Button scoreBtnM;
+    private static class ViewHolder {
+        int targetNum;
+        final TextView target;
+        final Button scoreBtnA;
+        final Button scoreBtnB;
+        final Button scoreBtnC;
+        final Button scoreBtnD;
+        final Button scoreBtnM;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             target = (TextView) view.findViewById(R.id.list_item_target);
             scoreBtnA = (Button) view.findViewById(R.id.list_item_btn_score_a);
             scoreBtnB = (Button) view.findViewById(R.id.list_item_btn_score_b);
@@ -55,20 +56,15 @@ public class TargetAdapter extends CursorAdapter {
         }
     }
 
-    public TargetAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
-        mContext = context;
-        mListView = null;
-    }
-
-    public TargetAdapter(Context context, Cursor c, int flags,
-                         ListView listView, Fragment fragment) {
+    TargetAdapter(Context context, Cursor c, int flags,
+                  ListView listView, Fragment fragment) {
         super(context, c, flags);
         mContext = context;
         mListView = listView;
+        mFragment = fragment;
     }
 
-    public int getItemViewType(String targetType) {
+    private int getItemViewType(String targetType) {
         if (targetType.equals(ScoreContract.TargetEntry.TARGET_TYPE_STEEL))
             return VIEW_TYPE_STEEL;
         else return VIEW_TYPE_PAPER;
@@ -221,8 +217,7 @@ public class TargetAdapter extends CursorAdapter {
                     || name.equals(context.getString(R.string.score_d)))
                 return View.INVISIBLE;
             else return View.VISIBLE;
-        }
-        else return View.VISIBLE;
+        } else return View.VISIBLE;
     }
 
     private int scoreColor(int score) {
@@ -232,9 +227,10 @@ public class TargetAdapter extends CursorAdapter {
 
     /**
      * Increases the score of the given target.
-     * @param cursor Cursor pointing to the target. Has to be open.
+     *
+     * @param cursor    Cursor pointing to the target. Has to be open.
      * @param targetNum Number of the target to be updated
-     * @param view Button that has been clicked. Indicates the score.
+     * @param view      Button that has been clicked. Indicates the score.
      */
     private void increaseScore(Cursor cursor, int targetNum, View view) {
         Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
@@ -246,33 +242,38 @@ public class TargetAdapter extends CursorAdapter {
 
         if (view.getId() == R.id.list_item_btn_score_a) {
             int score = cursor.getInt(TargetFragment.COL_SCORE_A);
-            if (score >= maxScore(targetType)) score = 0; else score++;
+            if (score >= maxScore(targetType)) score = 0;
+            else score++;
             targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_A, score);
         }
         if (view.getId() == R.id.list_item_btn_score_b) {
             int score = cursor.getInt(TargetFragment.COL_SCORE_B);
-            if (score >= maxScore(targetType)) score = 0; else score++;
+            if (score >= maxScore(targetType)) score = 0;
+            else score++;
             targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_B, score);
         }
         if (view.getId() == R.id.list_item_btn_score_c) {
             int score = cursor.getInt(TargetFragment.COL_SCORE_C);
-            if (score >= maxScore(targetType)) score = 0; else score++;
+            if (score >= maxScore(targetType)) score = 0;
+            else score++;
             targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_C, score);
         }
         if (view.getId() == R.id.list_item_btn_score_d) {
             int score = cursor.getInt(TargetFragment.COL_SCORE_D);
-            if (score >= maxScore(targetType)) score = 0; else score++;
+            if (score >= maxScore(targetType)) score = 0;
+            else score++;
             targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_D, score);
         }
         if (view.getId() == R.id.list_item_btn_score_m) {
             int score = cursor.getInt(TargetFragment.COL_SCORE_M);
-            if (score >= maxScore(targetType)) score = 0; else score++;
+            if (score >= maxScore(targetType)) score = 0;
+            else score++;
             targetValues.put(ScoreContract.TargetEntry.COLUMN_SCORE_M, score);
         }
 
         // select given target
         String selection = ScoreContract.TargetEntry.COLUMN_TARGET_NUMBER + " = ? ";
-        String[] args = { Integer.toString(targetNum) };
+        String[] args = {Integer.toString(targetNum)};
         mContext.getContentResolver().update(targetUri, targetValues, selection, args);
     }
 
