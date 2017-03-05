@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.icu.text.NumberFormat;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+
+import java.util.Locale;
 
 import kherb64.android.ipscscorer.data.ScoreContract;
 
@@ -24,12 +27,14 @@ public class BuildTargetsDialogFragment extends DialogFragment {
              * Each method passes the DialogFragment in case the host needs to query it. */
     public interface BuildTargetsDialogListener {
         void onDialogPositiveClick(DialogFragment dialog, int steelCount, int paperCount);
+
         void onDialogNegativeClick(DialogFragment dialog);
-        int numTargetsPrefs (String targetType);
+
+        int numTargetsPrefs(String targetType);
     }
 
     private static final boolean USE_FIX = false;
-    BuildTargetsDialogListener mListener;
+    private BuildTargetsDialogListener mListener;
     private View mRootView;
     private int mSteelCount;
     private int mPaperCount;
@@ -58,14 +63,14 @@ public class BuildTargetsDialogFragment extends DialogFragment {
         }
         AlertDialog dialog = builder.create();
 
-        mSteelView.setText(Integer.toString(mSteelCount));
-        mPaperView.setText(Integer.toString(mPaperCount));
+        mSteelView.setText(String.format(Locale.getDefault(), "%d", mSteelCount));
+        mPaperView.setText(String.format(Locale.getDefault(), "%d", mPaperCount));
 
         return dialog;
     }
 
     private final class OnPositiveClickListener
-        implements DialogInterface.OnClickListener {
+            implements DialogInterface.OnClickListener {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
             try {
@@ -101,8 +106,8 @@ public class BuildTargetsDialogFragment extends DialogFragment {
             mPaperCount = mListener.numTargetsPrefs(ScoreContract.TargetEntry.TARGET_TYPE_PAPER);
         } catch (ClassCastException e) {
             // The activity doesn't implement the interface, throw exception
-            throw new ClassCastException(activity.toString()
-                    + " must implement BuildTargetsDialogListener");
+            throw new ClassCastException(String.format(
+                    "%s must implement BuildTargetsDialogListener", activity.toString()));
         }
     }
 

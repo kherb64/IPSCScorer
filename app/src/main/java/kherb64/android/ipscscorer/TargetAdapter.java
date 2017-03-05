@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import kherb64.android.ipscscorer.data.ScoreContract;
 
 /**
@@ -127,7 +129,9 @@ class TargetAdapter extends CursorAdapter {
         viewHolder.targetNum = targetNum;
 
         // Write target label
-        viewHolder.target.setText(targetType + targetNum);
+        viewHolder.target.setText(String.format(
+                Locale.getDefault(), "%s%s",
+                targetType, targetNum));
 
         showScores(viewHolder, context, cursor, viewType);
 

@@ -108,7 +108,7 @@ public class MainActivity extends ActionBarActivity
         return 0;
     }
 
-    public void setNumTargetPrefs(String targetType, int count) {
+    void setNumTargetPrefs(String targetType, int count) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = prefs.edit();
         if (targetType.equals(ScoreContract.TargetEntry.TARGET_TYPE_STEEL)) {
@@ -145,7 +145,7 @@ public class MainActivity extends ActionBarActivity
      * @param targetType name of target type defined in ScoreContract.TargetEntry.
      * @return returns the number of targets.
      */
-    public int numTargetsDb(String targetType) {
+    int numTargetsDb(String targetType) {
         int cnt = 0;
         Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
         String selection = ScoreContract.TargetEntry.COLUMN_TARGET_TYPE + " = ?";

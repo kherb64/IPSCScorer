@@ -10,7 +10,7 @@
         android:id="@+id/score_total_target"
         android:layout_width="@dimen/abc_action_button_min_width_material"
         android:layout_height="@dimen/abc_action_button_min_height_material"
-        android:text="0"
+        android:text="@string/zero"
         android:textSize="24dp"
         android:gravity="center"/>
 
@@ -20,7 +20,7 @@
         android:layout_width="0dp"
         android:minWidth="@dimen/abc_action_button_min_width_material"
         android:layout_height="@dimen/abc_action_button_min_height_material"
-        android:text="0 A"
+        android:text="@string/zero_A"
         android:gravity="center"/>
 
     <TextView
@@ -29,7 +29,7 @@
         android:layout_width="0dp"
         android:minWidth="@dimen/abc_action_button_min_width_material"
         android:layout_height="@dimen/abc_action_button_min_height_material"
-        android:text="0 B"
+        android:text="@string/zero_B"
         android:gravity="center"/>
 
     <TextView
@@ -38,7 +38,7 @@
         android:layout_width="0dp"
         android:minWidth="@dimen/abc_action_button_min_width_material"
         android:layout_height="@dimen/abc_action_button_min_height_material"
-        android:text="0 C"
+        android:text="@string/zero_C"
         android:gravity="center"/>
 
     <TextView
@@ -47,7 +47,7 @@
         android:layout_width="0dp"
         android:minWidth="@dimen/abc_action_button_min_width_material"
         android:layout_height="@dimen/abc_action_button_min_height_material"
-        android:text="0 D"
+        android:text="@string/zero_D"
         android:gravity="center"/>
 
     <TextView
@@ -56,7 +56,7 @@
         android:layout_width="0dp"
         android:minWidth="@dimen/abc_action_button_min_width_material"
         android:layout_height="@dimen/abc_action_button_min_height_material"
-        android:text="0 M"
+        android:text="@string/zero_M"
         android:gravity="center"/>
 
 </LinearLayout>

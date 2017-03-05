@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import kherb64.android.ipscscorer.data.ScoreContract;
 
 /**
@@ -144,12 +146,12 @@ public class TotalFragment extends Fragment
 
             ViewHolder viewHolder = (ViewHolder) mRootView.getTag();
 
-            viewHolder.total_a.setText(mScoreA + " A");
-            viewHolder.total_b.setText(mScoreB + " B");
-            viewHolder.total_c.setText(mScoreC + " C");
-            viewHolder.total_d.setText(mScoreD + " D");
-            viewHolder.total_m.setText(mScoreM + " M");
-            viewHolder.total_target.setText(Integer.toString(mScoreTotal));
+            viewHolder.total_a.setText(String.format(Locale.getDefault(), "%d %s", mScoreA, "A"));
+            viewHolder.total_b.setText(String.format(Locale.getDefault(), "%d %s", mScoreB, "B"));
+            viewHolder.total_c.setText(String.format(Locale.getDefault(), "%d %s", mScoreC, "C"));
+            viewHolder.total_d.setText(String.format(Locale.getDefault(), "%d %s", mScoreD, "D"));
+            viewHolder.total_m.setText(String.format(Locale.getDefault(), "%d %s", mScoreM, "M"));
+            viewHolder.total_target.setText(String.format(Locale.getDefault(), "%d", mScoreTotal));
         }
     }
 

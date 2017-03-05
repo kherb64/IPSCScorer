@@ -5,7 +5,7 @@
     android:baselineAligned="false"
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
-    tools:context="kherb64.android.ipscscorer.app.MainActivity">
+    tools:context="kherb64.android.ipscscorer.MainActivity">
 
     <LinearLayout
         android:layout_weight="6"

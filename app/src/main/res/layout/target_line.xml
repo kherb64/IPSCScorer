@@ -10,7 +10,7 @@
         android:id="@+id/list_item_target"
         android:layout_width="@dimen/abc_action_button_min_width_material"
         android:layout_height="@dimen/abc_action_button_min_height_material"
-        android:text="T"
+        android:text="@string/t_target"
         android:textSize="24dp"
         android:gravity="center"/>
 

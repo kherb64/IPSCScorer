@@ -35,4 +35,15 @@
     <string name="Time">Time</string>
     <string name="Shooter">Shooter</string>
     <string name="action_clear_score">Clear score</string>
+    <string name="steel_targets">Steel targets</string>
+    <string name="paper_targets">Paper targets</string>
+    <string name="comment">Comment</string>
+    <string name="t_target">T</string>
+    <string name="shooter_s_name">Shooter\'s name</string>
+    <string name="zero">0</string>
+    <string name="zero_A">0 A</string>
+    <string name="zero_B">0 B</string>
+    <string name="zero_C">0 C</string>
+    <string name="zero_D">0 D</string>
+    <string name="zero_M">0 M</string>
 </resources>
