@@ -3,8 +3,8 @@ package kherb64.android.ipscscorer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.icu.text.NumberFormat;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -38,8 +38,8 @@ public class BuildTargetsDialogFragment extends DialogFragment {
     private View mRootView;
     private int mSteelCount;
     private int mPaperCount;
-    EditText mSteelView;
-    EditText mPaperView;
+    private EditText mSteelView;
+    private EditText mPaperView;
 
     @NonNull
     @Override
@@ -96,18 +96,24 @@ public class BuildTargetsDialogFragment extends DialogFragment {
 
     // Override the Fragment.onAttach() method to instantiate the BuildTargetsDialogListener
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        // Verify that the host activity implements the callback interface
-        try {
-            // Instantiate the BuildTargetsDialogListener so we can send events to the host
-            mListener = (BuildTargetsDialogListener) activity;
-            mSteelCount = mListener.numTargetsPrefs(ScoreContract.TargetEntry.TARGET_TYPE_STEEL);
-            mPaperCount = mListener.numTargetsPrefs(ScoreContract.TargetEntry.TARGET_TYPE_PAPER);
-        } catch (ClassCastException e) {
-            // The activity doesn't implement the interface, throw exception
-            throw new ClassCastException(String.format(
-                    "%s must implement BuildTargetsDialogListener", activity.toString()));
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        Activity activity;
+
+        if (context instanceof Activity) {
+            activity = (Activity) context;
+            // Verify that the host activity implements the callback interface
+            try {
+                // Instantiate the BuildTargetsDialogListener so we can send events to the host
+                mListener = (BuildTargetsDialogListener) activity;
+                mSteelCount = mListener.numTargetsPrefs(ScoreContract.TargetEntry.TARGET_TYPE_STEEL);
+                mPaperCount = mListener.numTargetsPrefs(ScoreContract.TargetEntry.TARGET_TYPE_PAPER);
+            } catch (ClassCastException e) {
+                // The activity doesn't implement the interface, throw exception
+                throw new ClassCastException(String.format(
+                        "%s must implement BuildTargetsDialogListener", activity.toString()));
+            }
         }
     }
 

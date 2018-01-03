@@ -19,7 +19,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
         android:inputType="number"
-        android:numeric="integer"
         android:maxLength="2"/>
 
     <TextView
@@ -36,7 +35,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
         android:inputType="number"
-        android:numeric="integer"
         android:maxLength="2"/>
 
 </LinearLayout>

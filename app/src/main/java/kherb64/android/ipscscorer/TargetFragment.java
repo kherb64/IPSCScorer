@@ -58,7 +58,7 @@ public class TargetFragment extends Fragment
     private TargetAdapter mTargetAdapter;
     private ListView mListView;
     private Context mContext;
-    MainActivity mMainActivity;
+    private MainActivity mMainActivity;
     private int mFirstVisiblePosition;
     private int mPosition;
 

@@ -10,7 +10,7 @@ import android.provider.BaseColumns;
  */
 public class ScoreContract {
     public static final String CONTENT_AUTHORITY = "kherb64.android.ipscscorer.app";
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     public static final String PATH_TARGET = "target";
     public static final String PATH_SCORE = "score";

@@ -4,16 +4,12 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-/**
- * Created by herb on 20.03.15.
- */
-public class ScoreDbHelper extends SQLiteOpenHelper {
+class ScoreDbHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
     private static final int DATABASE_VERSION = 3;
 
-    static final String DATABASE_NAME = "score.db";
-
+    private static final String DATABASE_NAME = "score.db";
 
     public ScoreDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

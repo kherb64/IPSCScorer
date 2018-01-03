@@ -53,14 +53,14 @@ public class ScoreFragment extends Fragment
     private int mScoreDQ;
     private String mScoreShareText;
 
-    static final int COL_TOTAL_PT = 1;
-    static final int COL_TOTAL_PRC = 2;
-    static final int COL_TOTAL_DQ = 3;
-    static final int COL_SHOOTER = 4;
-    static final int COL_FACTOR = 5;
-    static final int COL_NUM_SHOTS = 6;
-    static final int COL_TIME = 7;
-    static final int COL_COMMENT = 8;
+    private static final int COL_TOTAL_PT = 1;
+    private static final int COL_TOTAL_PRC = 2;
+    private static final int COL_TOTAL_DQ = 3;
+    private static final int COL_SHOOTER = 4;
+    private static final int COL_FACTOR = 5;
+    private static final int COL_NUM_SHOTS = 6;
+    private static final int COL_TIME = 7;
+    private static final int COL_COMMENT = 8;
 
     private static final String[] SCORE_COLUMNS = {
             ScoreContract.ScoreEntry.TABLE_NAME + "." + ScoreContract.ScoreEntry._ID,
@@ -74,11 +74,11 @@ public class ScoreFragment extends Fragment
             ScoreContract.ScoreEntry.COLUMN_COMMENT};
 
     // Indices for Target columns.
-    static final int COL_TOTAL_A = 1;
-    static final int COL_TOTAL_B = 2;
-    static final int COL_TOTAL_C = 3;
-    static final int COL_TOTAL_D = 4;
-    static final int COL_TOTAL_M = 5;
+    private static final int COL_TOTAL_A = 1;
+    private static final int COL_TOTAL_B = 2;
+    private static final int COL_TOTAL_C = 3;
+    private static final int COL_TOTAL_D = 4;
+    private static final int COL_TOTAL_M = 5;
 
     private static final String[] TARGET_COLUMNS = {
             ScoreContract.TargetEntry.TABLE_NAME + "." + ScoreContract.TargetEntry._ID,
@@ -187,7 +187,7 @@ public class ScoreFragment extends Fragment
         setHasOptionsMenu(true);
     }
 
-    private View.OnClickListener onScoreBtnClickListener = new View.OnClickListener() {
+    private final View.OnClickListener onScoreBtnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             increaseScore(v);
@@ -280,32 +280,30 @@ public class ScoreFragment extends Fragment
                 "%d A%n%d B%n%d C%n%d D&n%d M",
                 totals.get(0), totals.get(1), totals.get(2), totals.get(3), totals.get(4));
 
-        mScoreShareText = new StringBuilder()
-                .append(String.format(
-                        Locale.getDefault(), "%s %s", mContext.getString(R.string.app_name), SCORE_SHARE_HASHTAG))
-                .append(String.format(
-                        Locale.getDefault(), "%nParcours: %s", parcours))
-                .append(String.format(
-                        Locale.getDefault(), "%nShooter: %s", shooter))
-                .append(String.format(
-                        Locale.getDefault(), "%nFactor: %s", factorName(mScoreFactor)))
-                .append(String.format(
-                        Locale.getDefault(), "%nTime: %s", time))
-                .append(String.format(
-                        Locale.getDefault(), "%nShots: %s", numShots))
-                .append(String.format(
-                        Locale.getDefault(), "%n%s", totalsString))
-                .append(String.format(
-                        Locale.getDefault(), "%n%nTotal shots: %s", totals.get(5)))
-                .append(String.format(
-                        Locale.getDefault(), "%nPenalties: %s", mScorePT))
-                .append(String.format(
-                        Locale.getDefault(), "%nProcedures: %s", mScorePRC))
-                .append(String.format(
-                        Locale.getDefault(), "%nDisqualified: %s", mScorePT))
-                .append(String.format(
-                        Locale.getDefault(), "%nComment: %s", comment))
-                .toString();
+        mScoreShareText = String.format(
+                Locale.getDefault(), "%s %s", mContext.getString(R.string.app_name), SCORE_SHARE_HASHTAG) +
+                String.format(
+                        Locale.getDefault(), "%nParcours: %s", parcours) +
+                String.format(
+                        Locale.getDefault(), "%nShooter: %s", shooter) +
+                String.format(
+                        Locale.getDefault(), "%nFactor: %s", factorName(mScoreFactor)) +
+                String.format(
+                        Locale.getDefault(), "%nTime: %s", time) +
+                String.format(
+                        Locale.getDefault(), "%nShots: %s", numShots) +
+                String.format(
+                        Locale.getDefault(), "%n%s", totalsString) +
+                String.format(
+                        Locale.getDefault(), "%n%nTotal shots: %s", totals.get(5)) +
+                String.format(
+                        Locale.getDefault(), "%nPenalties: %s", mScorePT) +
+                String.format(
+                        Locale.getDefault(), "%nProcedures: %s", mScorePRC) +
+                String.format(
+                        Locale.getDefault(), "%nDisqualified: %s", mScorePT) +
+                String.format(
+                        Locale.getDefault(), "%nComment: %s", comment);
 
 
         if (mShareActionProvider != null)
@@ -344,7 +342,7 @@ public class ScoreFragment extends Fragment
      *
      * @return return true if successful.
      */
-    private boolean saveScore() {
+    private void saveScore() {
         Log.d(LOG_TAG, "Saving score");
         Uri scoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
 
@@ -378,7 +376,6 @@ public class ScoreFragment extends Fragment
             }
             cursor.close();
         }
-        return true;
     }
 
     /**
@@ -418,7 +415,7 @@ public class ScoreFragment extends Fragment
      * @return Returns a list of integers representing the total target scores. The items are
      * always sorted by this target sequence: A, B, C, D, M and the grand total.
      */
-    public ArrayList<Integer> getTotals() {
+    private ArrayList<Integer> getTotals() {
         // 0..4 = A..M; 5 = total
         ArrayList<Integer> totals = new ArrayList<>();
 

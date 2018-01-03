@@ -41,11 +41,11 @@ public class TotalFragment extends Fragment
     // These indices are tied to TOTAL_COLUMNS. If TOTAL_COLUMNS changes, these
     // must change.
     static final int COL_SCORE_ID = 0;
-    static final int COL_TOTAL_A = 1;
-    static final int COL_TOTAL_B = 2;
-    static final int COL_TOTAL_C = 3;
-    static final int COL_TOTAL_D = 4;
-    static final int COL_TOTAL_M = 5;
+    private static final int COL_TOTAL_A = 1;
+    private static final int COL_TOTAL_B = 2;
+    private static final int COL_TOTAL_C = 3;
+    private static final int COL_TOTAL_D = 4;
+    private static final int COL_TOTAL_M = 5;
 
     private static final String[] TOTAL_COLUMNS = {
             ScoreContract.TargetEntry.TABLE_NAME + "." + ScoreContract.TargetEntry._ID,
@@ -99,12 +99,6 @@ public class TotalFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         getLoaderManager().initLoader(TOTAL_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // new SaveTotalsAsyncTask().execute("");
     }
 
     @Override
