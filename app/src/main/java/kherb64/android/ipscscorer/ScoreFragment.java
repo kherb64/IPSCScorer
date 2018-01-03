@@ -39,8 +39,6 @@ public class ScoreFragment extends Fragment
 
     private static final String LOG_TAG = ScoreFragment.class.getSimpleName();
     private static final String SCORE_SHARE_HASHTAG = "#IPSCScorer";
-    private final int SCORE_LOADER = 1;
-    static final String SCORE_URI = "URI";
     private Uri mScoreUri;
     private Uri mTargetUri;
     private Context mContext;
@@ -103,14 +101,14 @@ public class ScoreFragment extends Fragment
         final Button btn_dq;
 
         ViewHolder(View view) {
-            shooter = (EditText) view.findViewById(R.id.score_shooter);
-            btn_factor = (Button) view.findViewById(R.id.btn_score_factor);
-            time = (EditText) view.findViewById(R.id.score_time);
-            num_shots = (EditText) view.findViewById(R.id.score_num_shots);
-            comment = (EditText) view.findViewById(R.id.score_comment);
-            btn_pt = (Button) view.findViewById(R.id.btn_score_pt);
-            btn_prc = (Button) view.findViewById(R.id.btn_score_prc);
-            btn_dq = (Button) view.findViewById(R.id.btn_score_dq);
+            shooter = view.findViewById(R.id.score_shooter);
+            btn_factor = view.findViewById(R.id.btn_score_factor);
+            time = view.findViewById(R.id.score_time);
+            num_shots = view.findViewById(R.id.score_num_shots);
+            comment = view.findViewById(R.id.score_comment);
+            btn_pt = view.findViewById(R.id.btn_score_pt);
+            btn_prc = view.findViewById(R.id.btn_score_prc);
+            btn_dq = view.findViewById(R.id.btn_score_dq);
         }
     }
 
@@ -126,10 +124,6 @@ public class ScoreFragment extends Fragment
         // Base ist etwas sicherer, immer mitgeben is auch nicht schlecht.
         mContext = getActivity().getBaseContext();
 
-        /* Bundle args = getArguments();
-        if (args != null) {
-            mScoreUri = args.getParcelable(ScoreFragment.SCORE_URI);
-        } */
         mScoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
         mTargetUri = ScoreContract.TargetEntry.CONTENT_URI;
 
@@ -177,6 +171,7 @@ public class ScoreFragment extends Fragment
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        int SCORE_LOADER = 1;
         getLoaderManager().initLoader(SCORE_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
@@ -203,15 +198,15 @@ public class ScoreFragment extends Fragment
         ViewHolder viewHolder = (ViewHolder) mRootView.getTag();
         if (view.getId() == R.id.btn_score_pt) {
             mScorePT++;
-            viewHolder.btn_pt.setText(mScorePT + " " + mContext.getString(R.string.score_pt));
+            viewHolder.btn_pt.setText(String.format(Locale.getDefault(), "%d %s", mScorePT, mContext.getString(R.string.score_pt)));
         }
         if (view.getId() == R.id.btn_score_prc) {
             mScorePRC++;
-            viewHolder.btn_prc.setText(mScorePRC + " " + mContext.getString(R.string.score_prc));
+            viewHolder.btn_prc.setText(String.format(Locale.getDefault(), "%d %s", mScorePRC, mContext.getString(R.string.score_prc)));
         }
         if (view.getId() == R.id.btn_score_dq) {
             mScoreDQ = 1 - mScoreDQ;
-            viewHolder.btn_dq.setText(mScoreDQ + " " + mContext.getString(R.string.score_dq));
+            viewHolder.btn_dq.setText(String.format(Locale.getDefault(), "%d %s", mScoreDQ, mContext.getString(R.string.score_dq)));
         }
         if (view.getId() == R.id.btn_score_factor) {
             mScoreFactor = 1 - mScoreFactor;
@@ -277,7 +272,7 @@ public class ScoreFragment extends Fragment
         ArrayList<Integer> totals = getTotals();
         String totalsString = String.format(
                 Locale.getDefault(),
-                "%d A%n%d B%n%d C%n%d D&n%d M",
+                "%d A%n%d B%n%d C%n%d D%n%d M",
                 totals.get(0), totals.get(1), totals.get(2), totals.get(3), totals.get(4));
 
         mScoreShareText = String.format(
@@ -339,8 +334,6 @@ public class ScoreFragment extends Fragment
 
     /**
      * Saves entered screen data to the database.
-     *
-     * @return return true if successful.
      */
     private void saveScore() {
         Log.d(LOG_TAG, "Saving score");
