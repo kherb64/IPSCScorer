@@ -27,14 +27,10 @@ import kherb64.android.ipscscorer.data.ScoreContract;
 public class TargetFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private final String LOG_TAG = TargetFragment.class.getSimpleName();
     private static final int SETTINGS_REQUEST = 1;
     private static final String SELECTED_KEY = "selected_position";
     private static final String FIRST_VISIBLE_POSITION = "first_visible_position";
 
-    // These indices are tied to SCORE_COLUMNS. If SCORE_COLUMNS changes, these
-    // must change.
-    static final int COL_TARGET_ID = 0;
     static final int COL_TARGET_NUM = 1;
     static final int COL_TARGET_TYPE = 2;
     static final int COL_SCORE_A = 3;
@@ -54,11 +50,9 @@ public class TargetFragment extends Fragment
             ScoreContract.TargetEntry.COLUMN_SCORE_M
     };
 
-    private final int TARGET_LOADER = 0;
     private TargetAdapter mTargetAdapter;
     private ListView mListView;
-    private Context mContext;
-    MainActivity mMainActivity;
+    private MainActivity mMainActivity;
     private int mFirstVisiblePosition;
     private int mPosition;
 
@@ -70,6 +64,7 @@ public class TargetFragment extends Fragment
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        int TARGET_LOADER = 0;
         getLoaderManager().initLoader(TARGET_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
@@ -83,11 +78,11 @@ public class TargetFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mContext = getActivity();
+        Context mContext = getActivity();
         mMainActivity = (MainActivity) mContext;
 
         View rootView = inflater.inflate(R.layout.fragment_targets, container, false);
-        mListView = (ListView) rootView.findViewById(R.id.listview_targets);
+        mListView = rootView.findViewById(R.id.listview_targets);
 
         mTargetAdapter = new TargetAdapter(mContext, null, 0, mListView, this);
         mListView.setAdapter(mTargetAdapter);

@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import kherb64.android.ipscscorer.data.ScoreContract;
 
@@ -38,8 +39,6 @@ public class ScoreFragment extends Fragment
 
     private static final String LOG_TAG = ScoreFragment.class.getSimpleName();
     private static final String SCORE_SHARE_HASHTAG = "#IPSCScorer";
-    private final int SCORE_LOADER = 1;
-    static final String SCORE_URI = "URI";
     private Uri mScoreUri;
     private Uri mTargetUri;
     private Context mContext;
@@ -52,17 +51,14 @@ public class ScoreFragment extends Fragment
     private int mScoreDQ;
     private String mScoreShareText;
 
-    // These indices are tied to SCORE_COLUMNS. If SCORE_COLUMNS changes, these
-    // must change.
-    static final int COL_SCORE_ID = 0;
-    static final int COL_TOTAL_PT = 1;
-    static final int COL_TOTAL_PRC = 2;
-    static final int COL_TOTAL_DQ = 3;
-    static final int COL_SHOOTER = 4;
-    static final int COL_FACTOR = 5;
-    static final int COL_NUM_SHOTS = 6;
-    static final int COL_TIME = 7;
-    static final int COL_COMMENT = 8;
+    private static final int COL_TOTAL_PT = 1;
+    private static final int COL_TOTAL_PRC = 2;
+    private static final int COL_TOTAL_DQ = 3;
+    private static final int COL_SHOOTER = 4;
+    private static final int COL_FACTOR = 5;
+    private static final int COL_NUM_SHOTS = 6;
+    private static final int COL_TIME = 7;
+    private static final int COL_COMMENT = 8;
 
     private static final String[] SCORE_COLUMNS = {
             ScoreContract.ScoreEntry.TABLE_NAME + "." + ScoreContract.ScoreEntry._ID,
@@ -76,11 +72,11 @@ public class ScoreFragment extends Fragment
             ScoreContract.ScoreEntry.COLUMN_COMMENT};
 
     // Indices for Target columns.
-    static final int COL_TOTAL_A = 1;
-    static final int COL_TOTAL_B = 2;
-    static final int COL_TOTAL_C = 3;
-    static final int COL_TOTAL_D = 4;
-    static final int COL_TOTAL_M = 5;
+    private static final int COL_TOTAL_A = 1;
+    private static final int COL_TOTAL_B = 2;
+    private static final int COL_TOTAL_C = 3;
+    private static final int COL_TOTAL_D = 4;
+    private static final int COL_TOTAL_M = 5;
 
     private static final String[] TARGET_COLUMNS = {
             ScoreContract.TargetEntry.TABLE_NAME + "." + ScoreContract.TargetEntry._ID,
@@ -94,7 +90,7 @@ public class ScoreFragment extends Fragment
     /**
      * Cache of the children views for a forecast list item.
      */
-    public static class ViewHolder {
+    private static class ViewHolder {
         final EditText shooter;
         final Button btn_factor;
         final EditText time;
@@ -105,14 +101,14 @@ public class ScoreFragment extends Fragment
         final Button btn_dq;
 
         ViewHolder(View view) {
-            shooter = (EditText) view.findViewById(R.id.score_shooter);
-            btn_factor = (Button) view.findViewById(R.id.btn_score_factor);
-            time = (EditText) view.findViewById(R.id.score_time);
-            num_shots = (EditText) view.findViewById(R.id.score_num_shots);
-            comment = (EditText) view.findViewById(R.id.score_comment);
-            btn_pt = (Button) view.findViewById(R.id.btn_score_pt);
-            btn_prc = (Button) view.findViewById(R.id.btn_score_prc);
-            btn_dq = (Button) view.findViewById(R.id.btn_score_dq);
+            shooter = view.findViewById(R.id.score_shooter);
+            btn_factor = view.findViewById(R.id.btn_score_factor);
+            time = view.findViewById(R.id.score_time);
+            num_shots = view.findViewById(R.id.score_num_shots);
+            comment = view.findViewById(R.id.score_comment);
+            btn_pt = view.findViewById(R.id.btn_score_pt);
+            btn_prc = view.findViewById(R.id.btn_score_prc);
+            btn_dq = view.findViewById(R.id.btn_score_dq);
         }
     }
 
@@ -128,10 +124,6 @@ public class ScoreFragment extends Fragment
         // Base ist etwas sicherer, immer mitgeben is auch nicht schlecht.
         mContext = getActivity().getBaseContext();
 
-        /* Bundle args = getArguments();
-        if (args != null) {
-            mScoreUri = args.getParcelable(ScoreFragment.SCORE_URI);
-        } */
         mScoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
         mTargetUri = ScoreContract.TargetEntry.CONTENT_URI;
 
@@ -179,6 +171,7 @@ public class ScoreFragment extends Fragment
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        int SCORE_LOADER = 1;
         getLoaderManager().initLoader(SCORE_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
@@ -189,7 +182,7 @@ public class ScoreFragment extends Fragment
         setHasOptionsMenu(true);
     }
 
-    private View.OnClickListener onScoreBtnClickListener = new View.OnClickListener() {
+    private final View.OnClickListener onScoreBtnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             increaseScore(v);
@@ -205,15 +198,15 @@ public class ScoreFragment extends Fragment
         ViewHolder viewHolder = (ViewHolder) mRootView.getTag();
         if (view.getId() == R.id.btn_score_pt) {
             mScorePT++;
-            viewHolder.btn_pt.setText(mScorePT + " " + mContext.getString(R.string.score_pt));
+            viewHolder.btn_pt.setText(String.format(Locale.getDefault(), "%d %s", mScorePT, mContext.getString(R.string.score_pt)));
         }
         if (view.getId() == R.id.btn_score_prc) {
             mScorePRC++;
-            viewHolder.btn_prc.setText(mScorePRC + " " + mContext.getString(R.string.score_prc));
+            viewHolder.btn_prc.setText(String.format(Locale.getDefault(), "%d %s", mScorePRC, mContext.getString(R.string.score_prc)));
         }
         if (view.getId() == R.id.btn_score_dq) {
             mScoreDQ = 1 - mScoreDQ;
-            viewHolder.btn_dq.setText(mScoreDQ + " " + mContext.getString(R.string.score_dq));
+            viewHolder.btn_dq.setText(String.format(Locale.getDefault(), "%d %s", mScoreDQ, mContext.getString(R.string.score_dq)));
         }
         if (view.getId() == R.id.btn_score_factor) {
             mScoreFactor = 1 - mScoreFactor;
@@ -259,12 +252,15 @@ public class ScoreFragment extends Fragment
 
             viewHolder.shooter.setText(shooter);
             viewHolder.btn_factor.setText(factorName(mScoreFactor));
-            viewHolder.time.setText(Integer.toString(time));
-            viewHolder.num_shots.setText(Integer.toString(numShots));
+            viewHolder.time.setText(String.format(Locale.getDefault(), "%d", time));
+            viewHolder.num_shots.setText(String.format(Locale.getDefault(), "%d", numShots));
             viewHolder.comment.setText(comment);
-            viewHolder.btn_pt.setText(mScorePT + " " + mContext.getString(R.string.score_pt));
-            viewHolder.btn_prc.setText(mScorePRC + " " + mContext.getString(R.string.score_prc));
-            viewHolder.btn_dq.setText(mScoreDQ + " " + mContext.getString(R.string.score_dq));
+            viewHolder.btn_pt.setText(String.format(
+                    Locale.getDefault(), "%d %s", mScorePT, mContext.getString(R.string.score_pt)));
+            viewHolder.btn_prc.setText(String.format(
+                    Locale.getDefault(), "%d %s", mScorePRC, mContext.getString(R.string.score_prc)));
+            viewHolder.btn_dq.setText(String.format(
+                    Locale.getDefault(), "%d %s", mScoreDQ, mContext.getString(R.string.score_dq)));
         }
     }
 
@@ -274,24 +270,35 @@ public class ScoreFragment extends Fragment
         String parcours = prefs.getString(mContext.getString(R.string.pref_parcours_key), mContext.getString(R.string.pref_parcours_default));
 
         ArrayList<Integer> totals = getTotals();
-        String totalsString = totals.get(0) + " A"
-                + "\n" + totals.get(1) + " B"
-                + "\n" + totals.get(2) + " C"
-                + "\n" + totals.get(3) + " D"
-                + "\n" + totals.get(4) + " M";
+        String totalsString = String.format(
+                Locale.getDefault(),
+                "%d A%n%d B%n%d C%n%d D%n%d M",
+                totals.get(0), totals.get(1), totals.get(2), totals.get(3), totals.get(4));
 
-        mScoreShareText = mContext.getString(R.string.app_name) + " " + SCORE_SHARE_HASHTAG
-                + "\nParcours: " + parcours
-                + "\nShooter: " + shooter
-                + "\nFactor: " + factorName(mScoreFactor)
-                + "\nTime: " + time
-                + "\nShots: " + numShots
-                + "\n" + totalsString
-                + "\nTotal shots: " + totals.get(5)
-                + "\nPenalties: " + mScorePT
-                + "\nProcedures: " + mScorePRC
-                + "\nDisqualified: " + mScorePT
-                + "\nComment: " + comment;
+        mScoreShareText = String.format(
+                Locale.getDefault(), "%s %s", mContext.getString(R.string.app_name), SCORE_SHARE_HASHTAG) +
+                String.format(
+                        Locale.getDefault(), "%nParcours: %s", parcours) +
+                String.format(
+                        Locale.getDefault(), "%nShooter: %s", shooter) +
+                String.format(
+                        Locale.getDefault(), "%nFactor: %s", factorName(mScoreFactor)) +
+                String.format(
+                        Locale.getDefault(), "%nTime: %s", time) +
+                String.format(
+                        Locale.getDefault(), "%nShots: %s", numShots) +
+                String.format(
+                        Locale.getDefault(), "%n%s", totalsString) +
+                String.format(
+                        Locale.getDefault(), "%n%nTotal shots: %s", totals.get(5)) +
+                String.format(
+                        Locale.getDefault(), "%nPenalties: %s", mScorePT) +
+                String.format(
+                        Locale.getDefault(), "%nProcedures: %s", mScorePRC) +
+                String.format(
+                        Locale.getDefault(), "%nDisqualified: %s", mScorePT) +
+                String.format(
+                        Locale.getDefault(), "%nComment: %s", comment);
 
 
         if (mShareActionProvider != null)
@@ -327,10 +334,8 @@ public class ScoreFragment extends Fragment
 
     /**
      * Saves entered screen data to the database.
-     *
-     * @return return true if successful.
      */
-    private boolean saveScore() {
+    private void saveScore() {
         Log.d(LOG_TAG, "Saving score");
         Uri scoreUri = ScoreContract.ScoreEntry.CONTENT_URI;
 
@@ -364,7 +369,6 @@ public class ScoreFragment extends Fragment
             }
             cursor.close();
         }
-        return true;
     }
 
     /**
@@ -404,7 +408,7 @@ public class ScoreFragment extends Fragment
      * @return Returns a list of integers representing the total target scores. The items are
      * always sorted by this target sequence: A, B, C, D, M and the grand total.
      */
-    public ArrayList<Integer> getTotals() {
+    private ArrayList<Integer> getTotals() {
         // 0..4 = A..M; 5 = total
         ArrayList<Integer> totals = new ArrayList<>();
 
@@ -441,7 +445,7 @@ public class ScoreFragment extends Fragment
         return totals;
     }
 
-    class SaveScoreAsyncTask extends AsyncTask<String, String, String> {
+    private class SaveScoreAsyncTask extends AsyncTask<String, String, String> {
         @Override
         protected String doInBackground(String... strings) {
             saveScore();
@@ -449,7 +453,7 @@ public class ScoreFragment extends Fragment
         }
     }
 
-    class ClearScoreAsyncTask extends AsyncTask<String, String, String> {
+    private class ClearScoreAsyncTask extends AsyncTask<String, String, String> {
         @Override
         protected String doInBackground(String... strings) {
             clearScore();

@@ -1,12 +1,9 @@
 package kherb64.android.ipscscorer;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 
-/**
- * Created by herb on 22.03.15.
- */
-public class ScoreActivity extends ActionBarActivity {
+public class ScoreActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

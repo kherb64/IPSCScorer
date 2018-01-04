@@ -19,8 +19,8 @@ public class ScoreProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private ScoreDbHelper mOpenHelper;
 
-    static final int TARGET = 100; // target based scores
-    static final int SCORE  = 101;  // totals, shooter, ...
+    private static final int TARGET = 100; // target based scores
+    private static final int SCORE  = 101;  // totals, shooter, ...
 
     private static final SQLiteQueryBuilder sTargetQueryBuilder;
     static {
@@ -28,7 +28,7 @@ public class ScoreProvider extends ContentProvider {
         sTargetQueryBuilder.setTables(ScoreContract.TargetEntry.TABLE_NAME);
     }
 
-    static UriMatcher buildUriMatcher() {
+    private static UriMatcher buildUriMatcher() {
         // 1) The code passed into the constructor represents the code to return for the root
         // URI.  It's common to use NO_MATCH as the code for this case. Add the constructor below.
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);

@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import kherb64.android.ipscscorer.data.ScoreContract;
 
 /**
@@ -31,8 +33,8 @@ class TargetAdapter extends CursorAdapter {
     private final Fragment mFragment;
     // private static final boolean USE_STEEL_LAYOUT = false;
 
-    private Context mContext;
-    private ListView mListView;
+    private final Context mContext;
+    private final ListView mListView;
 
     /**
      * Cache of the children views for a forecast list item.
@@ -92,7 +94,7 @@ class TargetAdapter extends CursorAdapter {
         return view;
     }
 
-    private View.OnClickListener onScoreBtnClickListener = new View.OnClickListener() {
+    private final View.OnClickListener onScoreBtnClickListener = new View.OnClickListener() {
         // TODO move clicking from adapter to fragmet, but this is too difficult for me now.
         @Override
         public void onClick(View v) {
@@ -127,7 +129,9 @@ class TargetAdapter extends CursorAdapter {
         viewHolder.targetNum = targetNum;
 
         // Write target label
-        viewHolder.target.setText(targetType + targetNum);
+        viewHolder.target.setText(String.format(
+                Locale.getDefault(), "%s%s",
+                targetType, targetNum));
 
         showScores(viewHolder, context, cursor, viewType);
 

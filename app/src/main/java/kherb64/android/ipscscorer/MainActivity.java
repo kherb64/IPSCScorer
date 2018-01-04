@@ -10,7 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import kherb64.android.ipscscorer.data.ScoreContract;
 
 
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends AppCompatActivity
         implements BuildTargetsDialogFragment.BuildTargetsDialogListener,
         TargetFragment.Callback {
 
@@ -108,7 +108,7 @@ public class MainActivity extends ActionBarActivity
         return 0;
     }
 
-    public void setNumTargetPrefs(String targetType, int count) {
+    private void setNumTargetPrefs(String targetType, int count) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = prefs.edit();
         if (targetType.equals(ScoreContract.TargetEntry.TARGET_TYPE_STEEL)) {
@@ -145,7 +145,7 @@ public class MainActivity extends ActionBarActivity
      * @param targetType name of target type defined in ScoreContract.TargetEntry.
      * @return returns the number of targets.
      */
-    public int numTargetsDb(String targetType) {
+    private int numTargetsDb(String targetType) {
         int cnt = 0;
         Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
         String selection = ScoreContract.TargetEntry.COLUMN_TARGET_TYPE + " = ?";
@@ -165,7 +165,7 @@ public class MainActivity extends ActionBarActivity
      * Builds targets in the database taking the numbers from the settings. Uses rebuildTargets
      * for doing the work.
      */
-    public void buildTargets() {
+    private void buildTargets() {
         Log.d(LOG_TAG, "Building targets");
 
         // invalidate clicked position
@@ -184,7 +184,7 @@ public class MainActivity extends ActionBarActivity
      * @param steelCount number of steel targets to be built.
      * @param paperCount number of paper targets to be built.
      */
-    public void rebuildTargets(int steelCount, int paperCount) {
+    private void rebuildTargets(int steelCount, int paperCount) {
         new RebuildTargetsAsyncTask(steelCount, paperCount).execute("");
     }
 
@@ -195,7 +195,7 @@ public class MainActivity extends ActionBarActivity
      * @param paperCount Number of paper targets to be built.
      * @return Returns the number of targets that have been created.
      */
-    private int rebuildTargets2(int steelCount, int paperCount) {
+    private void rebuildTargets2(int steelCount, int paperCount) {
         Log.d(LOG_TAG, "Rebuilding " + steelCount + " + " + paperCount + " targets");
         Uri targetUri = ScoreContract.TargetEntry.CONTENT_URI;
 
@@ -241,7 +241,6 @@ public class MainActivity extends ActionBarActivity
         } catch (Exception e) {
             // nothing
         }
-        return targetsCreated;
     }
 
     /**
@@ -347,8 +346,8 @@ public class MainActivity extends ActionBarActivity
 
     class RebuildTargetsAsyncTask extends AsyncTask<String, String, String> {
 
-        private int msteelCount;
-        private int mPaperCount;
+        private final int msteelCount;
+        private final int mPaperCount;
 
         RebuildTargetsAsyncTask(int steelCount, int paperCount) {
             msteelCount = steelCount;

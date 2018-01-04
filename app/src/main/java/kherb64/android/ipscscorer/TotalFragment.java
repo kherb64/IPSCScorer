@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import kherb64.android.ipscscorer.data.ScoreContract;
 
 /**
@@ -39,11 +41,11 @@ public class TotalFragment extends Fragment
     // These indices are tied to TOTAL_COLUMNS. If TOTAL_COLUMNS changes, these
     // must change.
     static final int COL_SCORE_ID = 0;
-    static final int COL_TOTAL_A = 1;
-    static final int COL_TOTAL_B = 2;
-    static final int COL_TOTAL_C = 3;
-    static final int COL_TOTAL_D = 4;
-    static final int COL_TOTAL_M = 5;
+    private static final int COL_TOTAL_A = 1;
+    private static final int COL_TOTAL_B = 2;
+    private static final int COL_TOTAL_C = 3;
+    private static final int COL_TOTAL_D = 4;
+    private static final int COL_TOTAL_M = 5;
 
     private static final String[] TOTAL_COLUMNS = {
             ScoreContract.TargetEntry.TABLE_NAME + "." + ScoreContract.TargetEntry._ID,
@@ -100,12 +102,6 @@ public class TotalFragment extends Fragment
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        // new SaveTotalsAsyncTask().execute("");
-    }
-
-    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (null != mTargetUri) {
             // Now create and return a CursorLoader that will take care of
@@ -144,12 +140,12 @@ public class TotalFragment extends Fragment
 
             ViewHolder viewHolder = (ViewHolder) mRootView.getTag();
 
-            viewHolder.total_a.setText(mScoreA + " A");
-            viewHolder.total_b.setText(mScoreB + " B");
-            viewHolder.total_c.setText(mScoreC + " C");
-            viewHolder.total_d.setText(mScoreD + " D");
-            viewHolder.total_m.setText(mScoreM + " M");
-            viewHolder.total_target.setText(Integer.toString(mScoreTotal));
+            viewHolder.total_a.setText(String.format(Locale.getDefault(), "%d %s", mScoreA, "A"));
+            viewHolder.total_b.setText(String.format(Locale.getDefault(), "%d %s", mScoreB, "B"));
+            viewHolder.total_c.setText(String.format(Locale.getDefault(), "%d %s", mScoreC, "C"));
+            viewHolder.total_d.setText(String.format(Locale.getDefault(), "%d %s", mScoreD, "D"));
+            viewHolder.total_m.setText(String.format(Locale.getDefault(), "%d %s", mScoreM, "M"));
+            viewHolder.total_target.setText(String.format(Locale.getDefault(), "%d", mScoreTotal));
         }
     }
 
